@@ -1,10 +1,13 @@
 'use client';
 
 import { ReactNode, useState } from 'react';
+import { useSession, signOut } from 'next-auth/react';
+import Image from 'next/image';
 import ThemeSwitcher from './ThemeSwitcher';
 
 export default function LayoutContent({ children }: { children: ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { data: session } = useSession();
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -48,9 +51,29 @@ export default function LayoutContent({ children }: { children: ReactNode }) {
             <span className={mobileMenuOpen ? 'open' : ''}></span>
           </button>
 
-          {/* Theme Switcher */}
+          {/* Theme Switcher + User */}
           <div className="nav-actions">
             <ThemeSwitcher />
+            {session?.user && (
+              <>
+                {session.user.image && (
+                  <Image
+                    src={session.user.image}
+                    alt={session.user.name || 'User'}
+                    width={32}
+                    height={32}
+                    className="user-avatar"
+                  />
+                )}
+                <button
+                  className="btn-signout"
+                  onClick={() => signOut({ callbackUrl: '/login' })}
+                  title={`Sign out (${session.user.email})`}
+                >
+                  Sign out
+                </button>
+              </>
+            )}
           </div>
         </div>
 
@@ -230,8 +253,37 @@ export default function LayoutContent({ children }: { children: ReactNode }) {
         .nav-actions {
           display: flex;
           align-items: center;
-          gap: 1rem;
+          gap: 0.75rem;
           flex-shrink: 0;
+        }
+
+        :global(.user-avatar) {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          border: 2px solid var(--border-color);
+          object-fit: cover;
+          flex-shrink: 0;
+        }
+
+        .btn-signout {
+          padding: 0.375rem 0.75rem;
+          background: transparent;
+          border: 1px solid var(--border-color);
+          border-radius: 0.5rem;
+          color: var(--text-secondary);
+          font-size: 0.8rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s;
+          white-space: nowrap;
+          font-family: inherit;
+        }
+
+        .btn-signout:hover {
+          border-color: var(--accent-red);
+          color: var(--accent-red);
+          background: rgba(239, 68, 68, 0.05);
         }
 
         /* Tablet (768px and below) */
