@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { companyInterviewQuestions, COMPANIES, CompanyQuestion, CompanyTopic } from '@/data/companyQuestions';
+import CodeEditor from '@/components/CodeEditor';
 
 export default function CompanyInterviewPage() {
   const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
@@ -362,6 +363,18 @@ export default function CompanyInterviewPage() {
                     <p style={{ color: 'var(--accent-yellow)', fontSize: '0.875rem' }}>
                       💡 Tip: Try answering out loud as if in a real interview!
                     </p>
+                  </div>
+
+                  {/* Code Editor for Practice */}
+                  <div style={{ marginTop: '2rem' }}>
+                    <h3 style={{ color: 'var(--text-primary)', fontSize: '1rem', marginBottom: '1rem' }}>
+                      💻 Practice Coding
+                    </h3>
+                    <CodeEditor
+                      questionText={quizQuestion?.text}
+                      language="javascript"
+                      showExecute={true}
+                    />
                   </div>
                 </>
               )}

@@ -5,75 +5,174 @@ node_modules/
 
 # Testing
 /coverage
+/.nyc_output
 
-# Next.js
+# Production build
 /.next/
 /out/
-.next
-dist
-build
+/build/
+/dist/
 
-# Production build files
-*.tsbuildinfo
-tsconfig.tsbuildinfo
-
-# Environment variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Logs
+# Misc
+.DS_Store
+*.pem
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-lerna-debug.log*
-*.log
-
-# Deployment logs
-vercel-deployment.log
-deployment.log
-
-# OS files
-.DS_Store
-Thumbs.db
-.vscode/settings.json
-.idea/
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+.env
+.env.local
+.env.*.local
 
 # IDE
-.VS/
-.vscode
+.vscode/
 .idea/
 *.swp
 *.swo
 *~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.history/
+
+# OS
+Thumbs.db
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea/*
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Vercel
+.vercel/
+.vercel
+
+# Yarn
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# Local environment overrides
+.env.local
+.env.*.local
+
+# TypeScript
+*.tsbuildinfo
+
+# Cache files
+.eslintcache
+.stylelintcache
 
 # Temporary files
 *.tmp
 *.temp
-.cache/
-.parcel-cache/
+*~
 
-# Lock files (optional - uncomment if team uses same package manager)
+# Package manager lock files (optional - uncomment if you want to share)
 # package-lock.json
 # yarn.lock
 # pnpm-lock.yaml
 
-# Misc
-.eslintcache
-.stylelintcache
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage
+*.lcov
+
+# Grunt intermediate storage
+.grunt
+
+# node-waf configuration
+.lock-wscript
+
+# Compiled binary addons (https://nodejs.org/api/addons.html)
+build/Release
+
+# Dependency directories
+jspm_packages/
+
+# Snowpack
+web_modules/
+
+# parcel-bundler-cache
+.cache
+.parcel-cache
+
+# vuepress build output
+.vuepress/dist
+
+# Serverless directories
+.serverless/
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# TernJS port file
+.tern-port
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# yarn v2
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# Mac
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+ehthumbs.db
+Thumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+
+# Linux
+.directory
+
+# Project specific
+.next/
+out/
+build/
+dist/
 *.pem
 
-# Local Netlify folder
-.netlify
+# Backup files
+*.bak
+*.backup
+*~
+
+# Lock files (optional - uncomment if you want stricter control)
+# Remove this if you want to commit lock files
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
