@@ -32,6 +32,7 @@ export default function InterviewStudioLayout() {
   const [isRunning, setIsRunning] = useState(false);
   const [filterDifficulty, setFilterDifficulty] = useState<'all' | 'easy' | 'medium' | 'hard'>('all');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [newProblem, setNewProblem] = useState<Partial<Problem>>({
     title: '',
@@ -153,6 +154,54 @@ export default function InterviewStudioLayout() {
     setShowAddModal(false);
   };
 
+  const handleEditProblem = () => {
+    setNewProblem(currentProblem);
+    setShowEditModal(true);
+  };
+
+  const handleSaveEditProblem = async () => {
+    if (!newProblem.title || !newProblem.shortDescription) {
+      alert('Please fill in at least title and description');
+      return;
+    }
+
+    const updatedProblem = newProblem as Problem;
+    const updatedProblems = problems.map((p, idx) =>
+      idx === currentProblemIdx ? updatedProblem : p
+    );
+
+    setProblems(updatedProblems);
+
+    // Save to localStorage for custom problems
+    try {
+      const customProblems = localStorage.getItem('interviewProblems');
+      if (customProblems) {
+        const parsed = JSON.parse(customProblems);
+        const updatedCustom = parsed.map((p: Problem) =>
+          p.title === currentProblem.title ? updatedProblem : p
+        );
+        localStorage.setItem('interviewProblems', JSON.stringify(updatedCustom));
+      }
+    } catch (error) {
+      console.error('Failed to save to localStorage:', error);
+    }
+
+    setShowEditModal(false);
+    setNewProblem({
+      title: '',
+      shortDescription: '',
+      description: '',
+      difficulty: 'medium',
+      estimatedTime: 45,
+      topics: [],
+      examples: [{ input: '', output: '', explanation: '' }],
+      constraints: [],
+      timeComplexity: '',
+      spaceComplexity: '',
+      starterCode: '',
+    });
+  };
+
   return (
     <div className="interview-studio">
       {isInterviewMode ? (
@@ -179,6 +228,7 @@ export default function InterviewStudioLayout() {
               <ProblemPanel
                 problem={currentProblem}
                 isInterviewMode={true}
+                onEdit={handleEditProblem}
               />
             </div>
 
@@ -394,6 +444,115 @@ export default function InterviewStudioLayout() {
                       onClick={handleAddProblem}
                     >
                       Create Problem
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Edit Problem Modal */}
+            {showEditModal && (
+              <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
+                <div className="modal-content" onClick={e => e.stopPropagation()}>
+                  <div className="modal-header">
+                    <h3>Edit Problem</h3>
+                    <button
+                      className="modal-close"
+                      onClick={() => setShowEditModal(false)}
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <div className="modal-body">
+                    <div className="form-group">
+                      <label>Problem Title *</label>
+                      <input
+                        type="text"
+                        value={newProblem.title || ''}
+                        onChange={(e) => setNewProblem({ ...newProblem, title: e.target.value })}
+                        placeholder="e.g., Two Sum"
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>Short Description *</label>
+                      <input
+                        type="text"
+                        value={newProblem.shortDescription || ''}
+                        onChange={(e) => setNewProblem({ ...newProblem, shortDescription: e.target.value })}
+                        placeholder="Brief one-line description"
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>Full Description</label>
+                      <textarea
+                        value={newProblem.description || ''}
+                        onChange={(e) => setNewProblem({ ...newProblem, description: e.target.value })}
+                        placeholder="Detailed problem description"
+                        rows={4}
+                      />
+                    </div>
+
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label>Difficulty</label>
+                        <select
+                          value={newProblem.difficulty || 'medium'}
+                          onChange={(e) => setNewProblem({ ...newProblem, difficulty: e.target.value as 'easy' | 'medium' | 'hard' })}
+                        >
+                          <option value="easy">Easy</option>
+                          <option value="medium">Medium</option>
+                          <option value="hard">Hard</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label>Estimated Time (min)</label>
+                        <input
+                          type="number"
+                          value={newProblem.estimatedTime || 45}
+                          onChange={(e) => setNewProblem({ ...newProblem, estimatedTime: parseInt(e.target.value) })}
+                          min="5"
+                          max="120"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label>Topics (comma-separated)</label>
+                      <input
+                        type="text"
+                        value={(newProblem.topics || []).join(', ')}
+                        onChange={(e) => setNewProblem({ ...newProblem, topics: e.target.value.split(',').map(t => t.trim()) })}
+                        placeholder="Array, Sorting, String"
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>Starter Code</label>
+                      <textarea
+                        value={newProblem.starterCode || ''}
+                        onChange={(e) => setNewProblem({ ...newProblem, starterCode: e.target.value })}
+                        placeholder="Optional starter code template"
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="modal-footer">
+                    <button
+                      className="btn-cancel"
+                      onClick={() => setShowEditModal(false)}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      className="btn-create"
+                      onClick={handleSaveEditProblem}
+                    >
+                      Save Changes
                     </button>
                   </div>
                 </div>

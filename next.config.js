@@ -2,4 +2,8 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    remotePatte
+    unoptimized: true,
+  },
+};
+
+module.exports = nextConfig;

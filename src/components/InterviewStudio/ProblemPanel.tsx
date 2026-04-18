@@ -16,18 +16,26 @@ interface Problem {
 interface ProblemPanelProps {
   problem: Problem;
   isInterviewMode: boolean;
+  onEdit?: () => void;
 }
 
-export default function ProblemPanel({ problem, isInterviewMode }: ProblemPanelProps) {
+export default function ProblemPanel({ problem, isInterviewMode, onEdit }: ProblemPanelProps) {
   const [activeTab, setActiveTab] = useState<'description' | 'examples' | 'complexity' | 'tips'>('description');
 
   return (
     <div className="problem-panel">
       <div className="panel-header">
-        <h2>{problem.title}</h2>
-        <span className={`difficulty difficulty-${problem.difficulty}`}>
-          {problem.difficulty}
-        </span>
+        <div className="header-left">
+          <h2>{problem.title}</h2>
+          <span className={`difficulty difficulty-${problem.difficulty}`}>
+            {problem.difficulty}
+          </span>
+        </div>
+        {onEdit && isInterviewMode && (
+          <button className="btn-edit" onClick={onEdit} title="Edit problem">
+            ✏️ Edit
+          </button>
+        )}
       </div>
 
       <div className="panel-tabs">
@@ -192,11 +200,19 @@ export default function ProblemPanel({ problem, isInterviewMode }: ProblemPanelP
         .panel-header {
           display: flex;
           justify-content: space-between;
-          align-items: start;
+          align-items: center;
           gap: 1rem;
           margin-bottom: 1.5rem;
           padding-bottom: 1rem;
           border-bottom: 2px solid var(--border-color);
+          flex-wrap: wrap;
+        }
+
+        .header-left {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          flex: 1;
         }
 
         .panel-header h2 {
@@ -226,6 +242,24 @@ export default function ProblemPanel({ problem, isInterviewMode }: ProblemPanelP
         .difficulty-hard {
           background: rgba(239, 68, 68, 0.2);
           color: var(--accent-red);
+        }
+
+        .btn-edit {
+          padding: 0.5rem 1rem;
+          background: var(--accent-blue);
+          color: white;
+          border: none;
+          border-radius: 0.5rem;
+          font-weight: 600;
+          cursor: pointer;
+          font-size: 0.85rem;
+          transition: all 0.2s;
+          white-space: nowrap;
+        }
+
+        .btn-edit:hover {
+          background: #1e90ff;
+          transform: scale(1.05);
         }
 
         .panel-tabs {
