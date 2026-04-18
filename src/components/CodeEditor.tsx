@@ -72,6 +72,8 @@ export default function CodeEditor({
   const [isResolving, setIsResolving] = useState(false);
   const [resolution, setResolution] = useState('');
   const [showResolution, setShowResolution] = useState(false);
+  const [hasSavedSolution, setHasSavedSolution] = useState(false);
+  const [showSavedSolution, setShowSavedSolution] = useState(false);
 
   const handleCodeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newCode = e.target.value;
@@ -127,6 +129,9 @@ export default function CodeEditor({
         // Successful execution
         setOutput(result.output ? result.output.trim() : '(No output)');
         setError('');
+        // Save successful code as solution
+        saveSolution(code.trim());
+        setHasSavedSolution(true);
       }
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Unknown error';
@@ -167,6 +172,24 @@ export default function CodeEditor({
   const getCacheKey = () => {
     const codeHash = btoa(code.substring(0, 100));
     return `resolution_code_${selectedLanguage}_${codeHash}`;
+  };
+
+  const getSolutionCacheKey = () => {
+    // Create a unique cache key for saved solutions based on title and language
+    return `solution_code_${selectedLanguage}`;
+  };
+
+  const saveSolution = (successCode: string) => {
+    const cacheKey = getSolutionCacheKey();
+    localStorage.setItem(cacheKey, successCode);
+  };
+
+  const loadSavedSolution = () => {
+    const cacheKey = getSolutionCacheKey();
+    const saved = localStorage.getItem(cacheKey);
+    if (saved) {
+      setShowSavedSolution(true);
+    }
   };
 
   const handleResolve = useCallback(async () => {
@@ -260,6 +283,15 @@ export default function CodeEditor({
             >
               {isResolving ? 'Resolving...' : 'Resolve'}
             </button>
+            {hasSavedSolution && (
+              <button
+                className="btn btn-solution"
+                onClick={loadSavedSolution}
+                title="View your saved solution"
+              >
+                💾 View Solution
+              </button>
+            )}
             <button className="btn btn-secondary" onClick={copyCode}>
               Copy
             </button>
@@ -330,6 +362,26 @@ export default function CodeEditor({
           </div>
           <div className="resolution-content">
             <pre>{resolution}</pre>
+          </div>
+        </div>
+      )}
+
+      {showSavedSolution && (
+        <div className="saved-solution-section">
+          <div className="saved-solution-header">
+            <h4>💾 Saved Solution</h4>
+            <button
+              className="close-solution"
+              onClick={() => setShowSavedSolution(false)}
+              title="Close saved solution"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="saved-solution-content">
+            <pre className="saved-code">
+              {localStorage.getItem(getSolutionCacheKey()) || 'No saved solution'}
+            </pre>
           </div>
         </div>
       )}
@@ -434,6 +486,20 @@ export default function CodeEditor({
         }
 
         .btn-resolve:disabled {
+          background: #999;
+          cursor: not-allowed;
+        }
+
+        .btn-solution {
+          background: #059669;
+          color: white;
+        }
+
+        .btn-solution:hover:not(:disabled) {
+          background: #047857;
+        }
+
+        .btn-solution:disabled {
           background: #999;
           cursor: not-allowed;
         }
@@ -625,6 +691,66 @@ export default function CodeEditor({
           border-radius: 4px;
           border: 1px solid #ddd;
           overflow-x: auto;
+        }
+
+        .saved-solution-section {
+          border: 1px solid #ddd;
+          border-left: 4px solid #059669;
+          background: #f9f9f9;
+          border-radius: 4px;
+          padding: 12px 15px;
+          margin: 10px 0;
+          max-height: 300px;
+          overflow-y: auto;
+        }
+
+        .saved-solution-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 10px;
+          padding-bottom: 10px;
+          border-bottom: 1px solid #ddd;
+        }
+
+        .saved-solution-header h4 {
+          margin: 0;
+          font-size: 14px;
+          color: #059669;
+          font-weight: 600;
+        }
+
+        .close-solution {
+          background: none;
+          border: none;
+          font-size: 18px;
+          cursor: pointer;
+          color: #666;
+          padding: 0;
+        }
+
+        .close-solution:hover {
+          color: #000;
+        }
+
+        .saved-solution-content {
+          font-size: 13px;
+          line-height: 1.5;
+          color: #333;
+        }
+
+        .saved-code {
+          margin: 0;
+          white-space: pre-wrap;
+          word-wrap: break-word;
+          background: white;
+          padding: 10px;
+          border-radius: 4px;
+          border: 1px solid #ddd;
+          overflow-x: auto;
+          font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace;
+          font-size: 13px;
+          color: #059669;
         }
 
         @media (max-width: 768px) {

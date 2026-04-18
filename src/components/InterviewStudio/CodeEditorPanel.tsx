@@ -85,6 +85,8 @@ export default function CodeEditorPanel({
   const [isResolving, setIsResolving] = useState(false);
   const [resolution, setResolution] = useState('');
   const [showResolution, setShowResolution] = useState(false);
+  const [hasSavedSolution, setHasSavedSolution] = useState(false);
+  const [showSavedSolution, setShowSavedSolution] = useState(false);
 
   const handleRunCode = useCallback(async () => {
     if (!code.trim()) {
@@ -185,6 +187,11 @@ export default function CodeEditorPanel({
       setTestResults(results);
       const passedCount = results.filter((r) => r.passed).length;
       setOutput(`✅ Test Results: ${passedCount}/${results.length} passed`);
+
+      // Save solution if all tests passed
+      if (passedCount === results.length) {
+        saveSolution(code.trim());
+      }
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Unknown error';
       setError(`Error: ${errorMsg}`);
@@ -205,6 +212,31 @@ export default function CodeEditorPanel({
     // Create a unique cache key based on problem and code
     const codeHash = btoa(code.substring(0, 100)); // Base64 encode first 100 chars
     return `resolution_${problem.title}_${language}_${codeHash}`;
+  };
+
+  const getSolutionCacheKey = () => {
+    // Create a unique cache key for saved solutions based on problem and language
+    return `solution_${problem.title}_${language}`;
+  };
+
+  const checkForSavedSolution = () => {
+    const cacheKey = getSolutionCacheKey();
+    const saved = localStorage.getItem(cacheKey);
+    setHasSavedSolution(!!saved);
+  };
+
+  const saveSolution = (successCode: string) => {
+    const cacheKey = getSolutionCacheKey();
+    localStorage.setItem(cacheKey, successCode);
+    setHasSavedSolution(true);
+  };
+
+  const loadSavedSolution = () => {
+    const cacheKey = getSolutionCacheKey();
+    const saved = localStorage.getItem(cacheKey);
+    if (saved) {
+      setShowSavedSolution(true);
+    }
   };
 
   const handleResolve = useCallback(async () => {
@@ -299,6 +331,15 @@ export default function CodeEditorPanel({
           >
             {isResolving ? '🤖 Resolving...' : '🤖 Resolve'}
           </button>
+          {hasSavedSolution && (
+            <button
+              className="btn btn-solution"
+              onClick={loadSavedSolution}
+              title="View your saved solution"
+            >
+              💾 View Solution
+            </button>
+          )}
           <button className="btn btn-reset" onClick={handleReset}>
             🔄 Reset
           </button>
@@ -371,6 +412,26 @@ export default function CodeEditorPanel({
             </div>
             <div className="resolution-content">
               <pre>{resolution}</pre>
+            </div>
+          </div>
+        )}
+
+        {showSavedSolution && (
+          <div className="saved-solution-section">
+            <div className="saved-solution-header">
+              <h4>💾 Saved Solution</h4>
+              <button
+                className="close-solution"
+                onClick={() => setShowSavedSolution(false)}
+                title="Close saved solution"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="saved-solution-content">
+              <pre className="saved-code">
+                {localStorage.getItem(getSolutionCacheKey()) || 'No saved solution'}
+              </pre>
             </div>
           </div>
         )}
@@ -465,6 +526,16 @@ export default function CodeEditorPanel({
 
         .btn-resolve:hover:not(:disabled) {
           background: #7c3aed;
+          transform: scale(1.02);
+        }
+
+        .btn-solution {
+          background: #059669;
+          color: white;
+        }
+
+        .btn-solution:hover:not(:disabled) {
+          background: #047857;
           transform: scale(1.02);
         }
 
@@ -708,6 +779,72 @@ export default function CodeEditorPanel({
           border-radius: 0.375rem;
           border: 1px solid var(--border-color);
           overflow-x: auto;
+        }
+
+        .saved-solution-section {
+          background: var(--bg-primary);
+          border-top: 1px solid var(--border-color);
+          border-left: 3px solid #059669;
+          padding: 1rem;
+          max-height: 250px;
+          overflow-y: auto;
+        }
+
+        .saved-solution-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 0.75rem;
+          padding-bottom: 0.75rem;
+          border-bottom: 1px solid var(--border-color);
+        }
+
+        .saved-solution-header h4 {
+          margin: 0;
+          font-size: 0.9rem;
+          color: #059669;
+          font-weight: 600;
+        }
+
+        .close-solution {
+          background: none;
+          border: none;
+          color: var(--text-secondary);
+          cursor: pointer;
+          font-size: 1rem;
+          padding: 0;
+          width: 24px;
+          height: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s;
+        }
+
+        .close-solution:hover {
+          color: var(--text-primary);
+          background: var(--border-color);
+          border-radius: 0.25rem;
+        }
+
+        .saved-solution-content {
+          font-size: 0.85rem;
+          line-height: 1.5;
+          color: var(--text-secondary);
+        }
+
+        .saved-code {
+          margin: 0;
+          white-space: pre-wrap;
+          word-wrap: break-word;
+          background: var(--bg-secondary);
+          padding: 0.75rem;
+          border-radius: 0.375rem;
+          border: 1px solid var(--border-color);
+          overflow-x: auto;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.85rem;
+          color: var(--accent-green);
         }
 
         @media (max-width: 768px) {

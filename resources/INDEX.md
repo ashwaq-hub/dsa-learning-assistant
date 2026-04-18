@@ -15,6 +15,8 @@ All markdown and documentation files are organized in this folder.
 - **[CODE_EDITOR_INTEGRATION.md](./CODE_EDITOR_INTEGRATION.md)** - Code editor integration details
 - **[CODE_COMPILER_INTEGRATION_SUMMARY.md](./CODE_COMPILER_INTEGRATION_SUMMARY.md)** - Compiler integration
 - **[COMPETITIVE_ANALYSIS_AND_IMPROVEMENTS.md](./COMPETITIVE_ANALYSIS_AND_IMPROVEMENTS.md)** - Feature comparison
+- **[RESOLVE_SETUP.md](./RESOLVE_SETUP.md)** - Gemini AI Resolve feature setup
+- **[SOLUTION_CACHING.md](./SOLUTION_CACHING.md)** - Solution caching and persistence
 
 ## 🎨 Theme & UI
 
