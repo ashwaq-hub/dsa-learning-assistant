@@ -1,18 +1,45 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
-  --bg-primary: #0f172a;
-  --bg-secondary: #1e293b;
-  --bg-card: #334155;
-  --text-primary: #f1f5f9;
-  --text-secondary: #94a3b8;
-  --accent-blue: #3b82f6;
-  --accent-green: #22c55e;
-  --accent-yellow: #eab308;
-  --accent-red: #ef4444;
-  --accent-purple: #a855f7;
-  --accent-cyan: #06b6d4;
-  --border-color: #475569;
+  /* Theme Color Variables - Will be overridden by ThemeContext */
+  --color-primary: #1e90ff;
+  --color-primary-light: #4da3ff;
+  --color-primary-dark: #0078d4;
+  --color-secondary: #2a2a2a;
+  --color-secondary-light: #3a3a3a;
+  --color-background: #0d0d0d;
+  --color-background-alt: #1a1a1a;
+  --color-card-background: #1e1e1e;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #b0b0b0;
+  --color-text-tertiary: #808080;
+  --color-accent-blue: #1e90ff;
+  --color-accent-purple: #da70d6;
+  --color-accent-yellow: #ffd700;
+  --color-accent-green: #00ff00;
+  --color-accent-red: #ff6b6b;
+  --color-border: #404040;
+  --color-border-light: #2a2a2a;
+  --color-success: #00ff00;
+  --color-warning: #ffd700;
+  --color-error: #ff6b6b;
+  --color-info: #1e90ff;
+  --color-shadow: rgba(0, 0, 0, 0.5);
+  --color-shadow-dark: rgba(0, 0, 0, 0.8);
+
+  /* Legacy variable names - map to new theme variables */
+  --bg-primary: var(--color-background);
+  --bg-secondary: var(--color-background-alt);
+  --bg-card: var(--color-card-background);
+  --text-primary: var(--color-text-primary);
+  --text-secondary: var(--color-text-secondary);
+  --accent-blue: var(--color-accent-blue);
+  --accent-green: var(--color-accent-green);
+  --accent-yellow: var(--color-accent-yellow);
+  --accent-red: var(--color-accent-red);
+  --accent-purple: var(--color-accent-purple);
+  --accent-cyan: var(--color-info);
+  --border-color: var(--color-border);
 }
 
 * {
