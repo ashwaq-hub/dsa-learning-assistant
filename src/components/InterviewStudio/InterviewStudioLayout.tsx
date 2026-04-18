@@ -1111,4 +1111,11 @@ export default function InterviewStudioLayout() {
             grid-template-columns: 1fr;
           }
 
-          .studio-pane
+          .studio-pane {
+            padding: 1rem;
+          }
+        }
+      `}</style>
+    </div>
+  );
+}
