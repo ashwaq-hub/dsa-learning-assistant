@@ -6,6 +6,8 @@ import CodeEditorPanel from './CodeEditorPanel';
 import InterviewTimer from './InterviewTimer';
 import { problems as defaultProblems } from '@/data/interviewProblems';
 
+const PAGE_SIZE = 50;
+
 interface Problem {
   title: string;
   description: string;
@@ -30,6 +32,7 @@ export default function InterviewStudioLayout() {
   const [isRunning, setIsRunning] = useState(false);
   const [filterDifficulty, setFilterDifficulty] = useState<'all' | 'easy' | 'medium' | 'hard'>('all');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   const [newProblem, setNewProblem] = useState<Partial<Problem>>({
     title: '',
     shortDescription: '',
@@ -44,32 +47,44 @@ export default function InterviewStudioLayout() {
     starterCode: '',
   });
 
-  // Load custom problems from localStorage
   useEffect(() => {
-    try {
-      const customProblems = localStorage.getItem('interviewProblems');
-      if (customProblems) {
-        const parsed = JSON.parse(customProblems);
-        // Combine default and custom problems
-        setProblems([...defaultProblems, ...parsed]);
+    async function loadCustomProblems() {
+      try {
+        const res = await fetch('/api/problems');
+        if (res.ok) {
+          const customProblems = await res.json();
+          if (Array.isArray(customProblems) && customProblems.length > 0) {
+            setProblems([...defaultProblems, ...customProblems]);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load custom problems:', error);
       }
-    } catch (error) {
-      console.error('Failed to load custom problems:', error);
     }
+    loadCustomProblems();
   }, []);
 
   const currentProblem = problems[currentProblemIdx] || problems[0];
 
-  // Filter problems by difficulty
   const filteredProblems = filterDifficulty === 'all'
     ? problems
     : problems.filter(p => p.difficulty === filterDifficulty);
 
-  const handleStartInterview = (difficulty: 'easy' | 'medium' | 'hard') => {
+  const totalPages = Math.ceil(filteredProblems.length / PAGE_SIZE);
+  const pagedProblems = filteredProblems.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  const handleStartInterview = () => {
     const timeMap = { easy: 20 * 60, medium: 45 * 60, hard: 60 * 60 };
-    setTimeLeft(timeMap[difficulty]);
+    setTimeLeft(timeMap[currentProblem.difficulty] || 45 * 60);
     setIsInterviewMode(true);
     setCode(currentProblem.starterCode || '');
+  };
+
+  const handleProblemClick = (actualIdx: number) => {
+    setCurrentProblemIdx(actualIdx);
+    setCode(problems[actualIdx]?.starterCode || '');
+    setOutput('');
+    setIsInterviewMode(true);
   };
 
   const handleEndInterview = () => {
@@ -93,26 +108,32 @@ export default function InterviewStudioLayout() {
     }
   };
 
-  const handleAddProblem = () => {
+  const handleAddProblem = async () => {
     if (!newProblem.title || !newProblem.shortDescription) {
       alert('Please fill in at least title and description');
       return;
     }
 
     const problemToAdd = newProblem as Problem;
-    const updatedProblems = [...problems, problemToAdd];
-    setProblems(updatedProblems);
 
-    // Save to localStorage
     try {
-      const customProblems = localStorage.getItem('interviewProblems') || '[]';
-      const parsed = JSON.parse(customProblems);
-      localStorage.setItem('interviewProblems', JSON.stringify([...parsed, problemToAdd]));
+      const res = await fetch('/api/problems', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(problemToAdd),
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to save problem');
+      }
+
+      setProblems(prev => [...prev, problemToAdd]);
     } catch (error) {
       console.error('Failed to save problem:', error);
+      alert('Failed to save problem to GitHub. Please check your configuration.');
+      return;
     }
 
-    // Reset form
     setNewProblem({
       title: '',
       shortDescription: '',
@@ -195,42 +216,27 @@ export default function InterviewStudioLayout() {
 
               {/* Difficulty Filter */}
               <div className="difficulty-filter">
-                <button
-                  className={`filter-btn ${filterDifficulty === 'all' ? 'active' : ''}`}
-                  onClick={() => setFilterDifficulty('all')}
-                >
-                  All
-                </button>
-                <button
-                  className={`filter-btn filter-easy ${filterDifficulty === 'easy' ? 'active' : ''}`}
-                  onClick={() => setFilterDifficulty('easy')}
-                >
-                  Easy
-                </button>
-                <button
-                  className={`filter-btn filter-medium ${filterDifficulty === 'medium' ? 'active' : ''}`}
-                  onClick={() => setFilterDifficulty('medium')}
-                >
-                  Medium
-                </button>
-                <button
-                  className={`filter-btn filter-hard ${filterDifficulty === 'hard' ? 'active' : ''}`}
-                  onClick={() => setFilterDifficulty('hard')}
-                >
-                  Hard
-                </button>
+                {(['all', 'easy', 'medium', 'hard'] as const).map(d => (
+                  <button
+                    key={d}
+                    className={`filter-btn filter-${d} ${filterDifficulty === d ? 'active' : ''}`}
+                    onClick={() => { setFilterDifficulty(d); setCurrentPage(1); }}
+                  >
+                    {d.charAt(0).toUpperCase() + d.slice(1)}
+                  </button>
+                ))}
               </div>
 
-              {/* Compact Problem List */}
+              {/* Problem List */}
               <div className="problems-list">
-                {filteredProblems.length > 0 ? (
-                  filteredProblems.map((problem, idx) => {
+                {pagedProblems.length > 0 ? (
+                  pagedProblems.map((problem, idx) => {
                     const actualIdx = problems.findIndex(p => p.title === problem.title);
                     return (
                       <div
                         key={idx}
                         className={`problem-item ${actualIdx === currentProblemIdx ? 'active' : ''}`}
-                        onClick={() => setCurrentProblemIdx(actualIdx)}
+                        onClick={() => handleProblemClick(actualIdx)}
                       >
                         <div className="item-left">
                           <h4>{problem.title}</h4>
@@ -251,35 +257,29 @@ export default function InterviewStudioLayout() {
                   <p className="no-problems">No problems found</p>
                 )}
               </div>
-            </div>
 
-            {/* Start Interview Section */}
-            <div className="start-section">
-              <h2>Start Interview</h2>
-              <p>Select difficulty and time limit:</p>
-              <div className="difficulty-buttons">
-                <button
-                  className="btn btn-difficulty-easy"
-                  onClick={() => handleStartInterview('easy')}
-                >
-                  <span className="time-badge">20 min</span>
-                  Easy
-                </button>
-                <button
-                  className="btn btn-difficulty-medium"
-                  onClick={() => handleStartInterview('medium')}
-                >
-                  <span className="time-badge">45 min</span>
-                  Medium
-                </button>
-                <button
-                  className="btn btn-difficulty-hard"
-                  onClick={() => handleStartInterview('hard')}
-                >
-                  <span className="time-badge">60 min</span>
-                  Hard
-                </button>
-              </div>
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="pagination">
+                  <button
+                    className="page-btn"
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    ← Prev
+                  </button>
+                  <span className="page-info">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    className="page-btn"
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    Next →
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Add Problem Modal */}
@@ -585,13 +585,11 @@ export default function InterviewStudioLayout() {
           background: var(--accent-red);
         }
 
-        /* Compact Problems List */
+        /* Problem List */
         .problems-list {
           display: flex;
           flex-direction: column;
           gap: 0.75rem;
-          max-height: 400px;
-          overflow-y: auto;
         }
 
         .problem-item {
@@ -683,84 +681,41 @@ export default function InterviewStudioLayout() {
           font-size: 0.9rem;
         }
 
-        /* Start Interview Section */
-        .start-section {
-          text-align: center;
-          margin-bottom: 3rem;
-        }
-
-        .start-section h2 {
-          font-size: 1.5rem;
-          font-weight: 700;
-          margin-bottom: 0.5rem;
-        }
-
-        .start-section > p {
-          color: var(--text-secondary);
-          margin-bottom: 1.5rem;
-        }
-
-        .difficulty-buttons {
+        /* Pagination */
+        .pagination {
           display: flex;
-          justify-content: center;
-          gap: 1.5rem;
-          flex-wrap: wrap;
-        }
-
-        .btn-difficulty-easy,
-        .btn-difficulty-medium,
-        .btn-difficulty-hard {
-          position: relative;
-          padding: 1rem 2rem;
-          font-size: 1rem;
-          font-weight: 600;
-          border: 2px solid;
-          border-radius: 0.75rem;
-          transition: all 0.3s;
-          display: flex;
-          flex-direction: column;
           align-items: center;
-          gap: 0.5rem;
-          min-width: 140px;
+          justify-content: center;
+          gap: 1rem;
+          margin-top: 1.5rem;
+          padding-top: 1.5rem;
+          border-top: 1px solid var(--border-color);
         }
 
-        .btn-difficulty-easy {
-          background: rgba(34, 197, 94, 0.1);
-          border-color: var(--accent-green);
-          color: var(--accent-green);
-        }
-
-        .btn-difficulty-easy:hover {
-          background: rgba(34, 197, 94, 0.2);
-          transform: scale(1.05);
-        }
-
-        .btn-difficulty-medium {
-          background: rgba(234, 179, 8, 0.1);
-          border-color: var(--accent-yellow);
-          color: var(--accent-yellow);
-        }
-
-        .btn-difficulty-medium:hover {
-          background: rgba(234, 179, 8, 0.2);
-          transform: scale(1.05);
-        }
-
-        .btn-difficulty-hard {
-          background: rgba(239, 68, 68, 0.1);
-          border-color: var(--accent-red);
-          color: var(--accent-red);
-        }
-
-        .btn-difficulty-hard:hover {
-          background: rgba(239, 68, 68, 0.2);
-          transform: scale(1.05);
-        }
-
-        .time-badge {
-          font-size: 0.75rem;
-          opacity: 0.8;
+        .page-btn {
+          padding: 0.5rem 1rem;
+          border: 1px solid var(--border-color);
+          background: var(--bg-primary);
+          color: var(--text-primary);
+          border-radius: 0.5rem;
+          cursor: pointer;
           font-weight: 500;
+          transition: all 0.2s;
+        }
+
+        .page-btn:hover:not(:disabled) {
+          border-color: var(--accent-blue);
+          color: var(--accent-blue);
+        }
+
+        .page-btn:disabled {
+          opacity: 0.4;
+          cursor: not-allowed;
+        }
+
+        .page-info {
+          font-size: 0.9rem;
+          color: var(--text-secondary);
         }
 
         /* Modal Styles */
@@ -968,11 +923,6 @@ export default function InterviewStudioLayout() {
             flex-direction: column;
             gap: 0.25rem;
             align-items: flex-end;
-          }
-
-          .difficulty-buttons {
-            flex-direction: column;
-            align-items: stretch;
           }
 
           .form-row {
