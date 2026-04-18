@@ -20,11 +20,4 @@ export default function RootLayout({
         <AuthProvider>
           <ThemeProvider>
             <LayoutContent>
-              {children}
-            </LayoutContent>
-          </ThemeProvider>
-        </AuthProvider>
-      </body>
-    </html>
-  );
-}
+     

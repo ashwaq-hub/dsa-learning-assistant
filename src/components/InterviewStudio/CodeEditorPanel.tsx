@@ -543,4 +543,40 @@ export default function CodeEditorPanel({
 
         .test-message {
           overflow: hidden;
-          text-overflow: ellips
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          line-height: 1.2;
+          flex: 1;
+        }
+
+        @media (max-width: 768px) {
+          .editor-header {
+            flex-direction: column;
+            align-items: stretch;
+          }
+
+          .language-selector {
+            width: 100%;
+          }
+
+          .editor-actions {
+            width: 100%;
+          }
+
+          .btn {
+            flex: 1;
+            min-width: 0;
+          }
+
+          .output-section {
+            max-height: 150px;
+          }
+
+          .code-textarea {
+            font-size: 0.85rem;
+          }
+        }
+      `}</style>
+    </div>
+  );
+}
