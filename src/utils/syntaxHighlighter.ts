@@ -14,6 +14,80 @@ const keywords: Record<string, string[]> = {
   csharp: ['using', 'namespace', 'class', 'public', 'private', 'protected', 'static', 'void', 'return', 'if', 'else', 'for', 'foreach', 'while', 'do', 'switch', 'case', 'break', 'continue', 'try', 'catch', 'finally', 'throw', 'new', 'this', 'base', 'virtual', 'override', 'abstract', 'interface', 'struct', 'enum', 'const', 'readonly', 'string', 'int', 'bool', 'double', 'float', 'decimal', 'long', 'true', 'false', 'null']
 };
 
+// Language-specific color themes
+export const colorThemes: Record<string, Record<string, string>> = {
+  javascript: {
+    keyword: '#f59e0b',    // Amber
+    string: '#10b981',     // Emerald
+    number: '#06b6d4',     // Cyan
+    comment: '#6b7280',    // Gray
+    operator: '#ef4444',   // Red
+    identifier: '#e5e7eb', // Light gray
+    default: '#e5e7eb',
+    whitespace: 'transparent',
+  },
+  python: {
+    keyword: '#a78bfa',    // Purple
+    string: '#34d399',     // Green
+    number: '#60a5fa',     // Blue
+    comment: '#9ca3af',    // Gray
+    operator: '#f87171',   // Red
+    identifier: '#d1d5db', // Light gray
+    default: '#d1d5db',
+    whitespace: 'transparent',
+  },
+  java: {
+    keyword: '#ec4899',    // Pink
+    string: '#22d3ee',     // Cyan
+    number: '#fbbf24',     // Amber
+    comment: '#9ca3af',    // Gray
+    operator: '#fb7185',   // Rose
+    identifier: '#e5e7eb', // Light gray
+    default: '#e5e7eb',
+    whitespace: 'transparent',
+  },
+  cpp: {
+    keyword: '#8b5cf6',    // Violet
+    string: '#4ade80',     // Green
+    number: '#2dd4bf',     // Teal
+    comment: '#6b7280',    // Gray
+    operator: '#f472b6',   // Pink
+    identifier: '#d1d5db', // Light gray
+    default: '#d1d5db',
+    whitespace: 'transparent',
+  },
+  c: {
+    keyword: '#06b6d4',    // Cyan
+    string: '#84cc16',     // Lime
+    number: '#f43f5e',     // Rose
+    comment: '#6b7280',    // Gray
+    operator: '#facc15',   // Yellow
+    identifier: '#e5e7eb', // Light gray
+    default: '#e5e7eb',
+    whitespace: 'transparent',
+  },
+  go: {
+    keyword: '#3b82f6',    // Blue
+    string: '#14b8a6',     // Teal
+    number: '#f59e0b',     // Amber
+    comment: '#9ca3af',    // Gray
+    operator: '#f97316',   // Orange
+    identifier: '#d1d5db', // Light gray
+    default: '#d1d5db',
+    whitespace: 'transparent',
+  },
+  csharp: {
+    keyword: '#7c3aed',    // Violet
+    string: '#06b6d4',     // Cyan
+    number: '#ec4899',     // Pink
+    comment: '#6b7280',    // Gray
+    operator: '#f43f5e',   // Rose
+    identifier: '#e5e7eb', // Light gray
+    default: '#e5e7eb',
+    whitespace: 'transparent',
+  },
+};
+
 export function highlightCode(code: string, language: string): Token[] {
   const tokens: Token[] = [];
   let i = 0;
@@ -138,14 +212,3 @@ export function highlightCode(code: string, language: string): Token[] {
 
   return tokens;
 }
-
-export const highlightTheme = {
-  keyword: '#ff7700',
-  string: '#22cc22',
-  number: '#00ccff',
-  comment: '#888888',
-  operator: '#ff5500',
-  identifier: '#ffffff',
-  default: '#ffffff',
-  whitespace: 'transparent',
-};

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { highlightCode, highlightTheme } from '@/utils/syntaxHighlighter';
+import { highlightCode, colorThemes } from '@/utils/syntaxHighlighter';
 
 interface CodeEditorProps {
   initialCode?: string;
@@ -63,8 +63,8 @@ export default function CodeEditor({
   showExecute = true,
   questionText,
 }: CodeEditorProps) {
-  const [code, setCode] = useState(initialCode || codeExamples[language] || '');
-  const [selectedLanguage, setSelectedLanguage] = useState(language);
+  const [code, setCode] = useState(initialCode || codeExamples[language] || codeExamples['java'] || '');
+  const [selectedLanguage, setSelectedLanguage] = useState(language || 'java');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -208,7 +208,7 @@ export default function CodeEditor({
             {highlightCode(code, selectedLanguage).map((token, idx) => (
               <span
                 key={idx}
-                style={{ color: highlightTheme[token.type as keyof typeof highlightTheme] }}
+                style={{ color: colorThemes[selectedLanguage][token.type] || colorThemes[selectedLanguage].default }}
               >
                 {token.value}
               </span>

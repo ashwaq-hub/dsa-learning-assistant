@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { highlightCode, highlightTheme } from '@/utils/syntaxHighlighter';
+import { highlightCode, colorThemes } from '@/utils/syntaxHighlighter';
 
 interface Problem {
   title: string;
@@ -79,7 +79,7 @@ export default function CodeEditorPanel({
   isRunning,
   setIsRunning,
 }: CodeEditorPanelProps) {
-  const [language, setLanguage] = useState('javascript');
+  const [language, setLanguage] = useState('java');
   const [error, setError] = useState('');
   const [testResults, setTestResults] = useState<Array<{ passed: boolean; message: string }>>([]);
 
@@ -236,7 +236,7 @@ export default function CodeEditorPanel({
           {highlightCode(code, language).map((token, idx) => (
             <span
               key={idx}
-              style={{ color: highlightTheme[token.type as keyof typeof highlightTheme] }}
+              style={{ color: colorThemes[language][token.type] || colorThemes[language].default }}
             >
               {token.value}
             </span>
