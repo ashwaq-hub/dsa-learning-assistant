@@ -273,7 +273,7 @@ export default function CodeEditor({
               onClick={handleExecute}
               disabled={loading}
             >
-              {loading ? 'Running...' : 'Run Code'}
+              {loading ? 'Running...' : 'Run'}
             </button>
             <button
               className="btn btn-resolve"

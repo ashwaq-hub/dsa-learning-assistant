@@ -314,14 +314,14 @@ export default function CodeEditorPanel({
             onClick={handleRunCode}
             disabled={isRunning}
           >
-            {isRunning ? '⏳ Running...' : '▶️ Run Code'}
+            {isRunning ? '⏳ Running...' : '▶️ Run'}
           </button>
           <button
             className="btn btn-test"
             onClick={handleRunTestCases}
             disabled={isRunning}
           >
-            {isRunning ? '⏳ Testing...' : '✅ Run Tests'}
+            {isRunning ? '⏳ Testing...' : '✅ Test'}
           </button>
           <button
             className="btn btn-resolve"
