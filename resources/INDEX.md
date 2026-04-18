@@ -30,6 +30,7 @@ All markdown and documentation files are organized in this folder.
 - **[COMPANY_INTERVIEW_SETUP.md](./COMPANY_INTERVIEW_SETUP.md)** - Company-wise interview setup
 - **[TEST_CASES_GUIDE.md](./TEST_CASES_GUIDE.md)** - Creating and managing test cases
 - **[JAVA_TEST_TEMPLATE.md](./JAVA_TEST_TEMPLATE.md)** - Java template with test examples
+- **[TEST_DEBUGGING.md](./TEST_DEBUGGING.md)** - Debugging test failures and common issues
 
 ## 🆕 Recent Updates
 
