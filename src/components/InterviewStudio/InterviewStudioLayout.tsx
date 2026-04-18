@@ -240,6 +240,9 @@ export default function InterviewStudioLayout() {
                         key={idx}
                         className={`problem-item ${actualIdx === currentProblemIdx ? 'active' : ''}`}
                         onClick={() => handleProblemClick(actualIdx)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => e.key === 'Enter' && handleProblemClick(actualIdx)}
                       >
                         <div className="item-left">
                           <h4>{problem.title}</h4>
@@ -252,6 +255,9 @@ export default function InterviewStudioLayout() {
                             {problem.difficulty}
                           </span>
                           <span className="item-time">⏱ {problem.estimatedTime}min</span>
+                          {actualIdx === currentProblemIdx && (
+                            <span className="item-open-hint">▶ Open</span>
+                          )}
                         </div>
                       </div>
                     );
@@ -650,6 +656,13 @@ export default function InterviewStudioLayout() {
         .item-time {
           font-size: 0.75rem;
           color: var(--text-secondary);
+          white-space: nowrap;
+        }
+
+        .item-open-hint {
+          font-size: 0.7rem;
+          font-weight: 600;
+          color: var(--accent-blue);
           white-space: nowrap;
         }
 
