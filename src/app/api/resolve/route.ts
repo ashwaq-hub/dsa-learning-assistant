@@ -56,9 +56,9 @@ Please analyze the code and provide:
 
 Be concise and focus on the critical issues first.`;
 
-    // Call Gemini API
+    // Call Gemini API with API key in URL
     const geminiResponse = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: {
@@ -87,6 +87,17 @@ Be concise and focus on the critical issues first.`;
     if (!geminiResponse.ok) {
       const errorData = await geminiResponse.json();
       console.error('Gemini API error:', errorData);
+
+      // Better error messages
+      if (geminiResponse.status === 403) {
+        throw new Error(
+          'API Key Error: Check that GOOGLE_GEMINI_API_KEY is set correctly in environment variables. The key should be from https://aistudio.google.com/apikey'
+        );
+      }
+      if (geminiResponse.status === 401) {
+        throw new Error('API Key is invalid or expired. Please regenerate from https://aistudio.google.com/apikey');
+      }
+
       throw new Error(
         errorData.error?.message || `Gemini API error: ${geminiResponse.statusText}`
       );
