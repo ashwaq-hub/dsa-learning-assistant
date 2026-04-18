@@ -241,4 +241,89 @@ export default function LayoutContent({ children }: { children: ReactNode }) {
         }
 
         .nav-link-studio-mobile {
-          c
+          color: #ff6b6b;
+          font-weight: 600;
+        }
+
+        .nav-link-studio-mobile:hover {
+          background: rgba(255, 107, 107, 0.1);
+          color: #ff6b6b;
+        }
+
+        .nav-actions {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          flex-shrink: 0;
+        }
+
+        :global(.user-avatar) {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          border: 2px solid var(--border-color);
+          object-fit: cover;
+          flex-shrink: 0;
+        }
+
+        .btn-signout {
+          padding: 0.375rem 0.75rem;
+          background: transparent;
+          border: 1px solid var(--border-color);
+          border-radius: 0.5rem;
+          color: var(--text-secondary);
+          font-size: 0.8rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s;
+          white-space: nowrap;
+          font-family: inherit;
+        }
+
+        .btn-signout:hover {
+          border-color: var(--accent-red);
+          color: var(--accent-red);
+          background: rgba(239, 68, 68, 0.05);
+        }
+
+        /* Tablet (768px and below) */
+        @media (max-width: 768px) {
+          .brand-text {
+            display: none;
+          }
+
+          .nav-brand {
+            font-size: 1.5rem;
+          }
+
+          .nav-links-desktop {
+            display: none;
+          }
+
+          .hamburger {
+            display: flex;
+          }
+
+          .nav-links-mobile {
+            display: flex;
+          }
+
+          .nav-actions {
+            gap: 0.5rem;
+          }
+        }
+
+        /* Mobile (480px and below) */
+        @media (max-width: 480px) {
+          .nav-content {
+            gap: 1rem;
+          }
+
+          .nav-actions {
+            gap: 0.25rem;
+          }
+        }
+      `}</style>
+    </>
+  );
+}
