@@ -81,8 +81,11 @@ export default function InterviewStudioLayout() {
   };
 
   const handleProblemClick = (actualIdx: number) => {
+    const timeMap = { easy: 20 * 60, medium: 45 * 60, hard: 60 * 60 };
+    const problem = problems[actualIdx];
+    setTimeLeft(timeMap[problem?.difficulty] || 45 * 60);
     setCurrentProblemIdx(actualIdx);
-    setCode(problems[actualIdx]?.starterCode || '');
+    setCode(problem?.starterCode || '');
     setOutput('');
     setIsInterviewMode(true);
   };
