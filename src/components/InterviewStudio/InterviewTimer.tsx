@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 interface InterviewTimerProps {
   timeLeft: number;
@@ -13,9 +13,12 @@ export default function InterviewTimer({
   setTimeLeft,
   onTimeEnd,
 }: InterviewTimerProps) {
+  const onTimeEndRef = useRef(onTimeEnd);
+  onTimeEndRef.current = onTimeEnd;
+
   useEffect(() => {
     if (timeLeft <= 0) {
-      onTimeEnd();
+      onTimeEndRef.current();
       return;
     }
 
@@ -24,7 +27,7 @@ export default function InterviewTimer({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [timeLeft, setTimeLeft, onTimeEnd]);
+  }, [timeLeft, setTimeLeft]);
 
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
