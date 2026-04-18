@@ -1,0 +1,9 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "description": "Custom interview questions added by users",
+    "lastUpdated": "2026-04-15",
+    "instructions": "Add questions following the same structure below. Each question must have: text, topic, difficulty, and companies array."
+  },
+  "questions": []
+}

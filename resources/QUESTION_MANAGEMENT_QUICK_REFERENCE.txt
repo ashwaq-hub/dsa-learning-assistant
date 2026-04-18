@@ -1,0 +1,312 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                                                                            ║
+║              📝 QUESTION MANAGEMENT - QUICK REFERENCE CARD                ║
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+🎯 THREE WAYS TO ADD QUESTIONS
+════════════════════════════════════════════════════════════════════════════
+
+METHOD 1: ADMIN DASHBOARD (EASIEST)
+──────────────────────────────────
+Route:        /admin
+Best for:     Adding 1-5 questions at a time
+Time:         2-10 minutes per question
+Skills:       None required
+Steps:
+  1. Go to /admin
+  2. Fill question form
+  3. Click "Add Question"
+  4. Copy JSON from console
+  5. Paste into companyQuestions.ts
+
+✅ Pros:       Easy UI, visual company selection
+❌ Cons:       Only stores in browser temporarily
+
+
+METHOD 2: CSV EXPORT/IMPORT (BULK EDITING)
+──────────────────────────────────────────
+Format:       .csv (Excel/Google Sheets)
+Best for:     Bulk add 10+ questions, team sharing
+Time:         30-60 minutes for 10 questions
+Skills:       Excel/Sheets knowledge helpful
+Steps:
+  1. Export CSV from /admin
+  2. Open in Excel/Google Sheets
+  3. Add your questions (new rows)
+  4. Save as CSV
+  5. Import back via /admin
+  6. Copy JSON from console
+  7. Paste into companyQuestions.ts
+
+✅ Pros:       Familiar format, can bulk edit
+❌ Cons:       Extra steps to finalize
+
+
+METHOD 3: DIRECT JSON EDITING (DEVELOPER)
+──────────────────────────────────────────
+File:         src/data/companyQuestions.ts
+Best for:     Developers, quick edits, integration
+Time:         5-10 minutes per question
+Skills:       Understanding of JSON/TypeScript
+Steps:
+  1. Open companyQuestions.ts
+  2. Find your topic section
+  3. Add new question object
+  4. Save file
+  5. Test at /company
+
+✅ Pros:       Permanent, integrated, fastest for devs
+❌ Cons:       Need to understand JSON structure
+
+
+════════════════════════════════════════════════════════════════════════════
+
+📋 QUESTION DATA STRUCTURE
+════════════════════════════════════════════════════════════════════════════
+
+Required Fields:
+  • text (string)             - The interview question
+  • topic (string)            - Arrays, Strings, Trees, etc.
+  • difficulty (string)       - Easy, Medium, or Hard
+  • companies (array)         - ["Google", "Meta", "Amazon", ...]
+
+Example:
+{
+  "text": "How do you reverse a linked list?",
+  "topic": "Linked Lists",
+  "difficulty": "Medium",
+  "companies": ["Google", "Meta", "Amazon"]
+}
+
+
+════════════════════════════════════════════════════════════════════════════
+
+🏢 AVAILABLE COMPANIES
+════════════════════════════════════════════════════════════════════════════
+
+  Google          Meta            Amazon
+  Apple           Microsoft       Twitter
+  LinkedIn        Uber
+
+⚠️  Use EXACT names - capitalization matters!
+
+
+════════════════════════════════════════════════════════════════════════════
+
+📚 AVAILABLE TOPICS
+════════════════════════════════════════════════════════════════════════════
+
+  Arrays          Strings         Linked Lists
+  Trees           Dynamic Programming  Graphs
+  Hash Tables     Heaps & Priority Queues
+
+
+════════════════════════════════════════════════════════════════════════════
+
+🚀 QUICKSTART FLOW
+════════════════════════════════════════════════════════════════════════════
+
+DAY 1: ONE QUESTION
+  /admin → Form → Add Question → Copy JSON → Paste → Done!
+
+WEEKLY: 5-10 QUESTIONS
+  /admin → Export CSV → Open Excel → Add questions → Import CSV → Done!
+
+MONTHLY: 20+ QUESTIONS
+  Create master CSV → Bulk import via /admin → Done!
+
+
+════════════════════════════════════════════════════════════════════════════
+
+📊 ADMIN DASHBOARD FEATURES
+════════════════════════════════════════════════════════════════════════════
+
+Tab 1: ➕ ADD QUESTION
+  • Text input (textarea)
+  • Topic selector (dropdown)
+  • Difficulty picker (Easy/Medium/Hard)
+  • Company checkboxes (multi-select)
+  • Submit button
+  • Shows success/error messages
+  • JSON logged to console
+
+Tab 2: 👁️ VIEW ALL
+  • See all {count} questions
+  • Color-coded by difficulty
+  • Shows topic and companies
+  • Useful for verification
+
+Tab 3: 📥 EXPORT
+  • Download as CSV
+  • Download as JSON
+  • Great for backups
+  • Share with team
+
+Tab 4: 📤 IMPORT
+  • Upload CSV or JSON
+  • Parsed automatically
+  • Output to console
+  • Shows any errors
+
+
+════════════════════════════════════════════════════════════════════════════
+
+💾 FILE LOCATIONS
+════════════════════════════════════════════════════════════════════════════
+
+Code Files:
+  src/app/admin/page.tsx              ← Admin dashboard
+  src/data/companyQuestions.ts        ← MAIN DATA FILE (edit this!)
+  src/data/customQuestions.json       ← Template
+
+Documentation:
+  QUESTION_MANAGEMENT_GUIDE.md        ← Full guide (READ THIS!)
+  QUESTION_MANAGEMENT_QUICK_REFERENCE.txt  ← This file
+
+
+════════════════════════════════════════════════════════════════════════════
+
+⚡ WORKFLOW BY USE CASE
+════════════════════════════════════════════════════════════════════════════
+
+USE CASE 1: I have 1 question to add
+  → Use Admin Dashboard (5 minutes)
+
+USE CASE 2: I have a spreadsheet of questions
+  → Export current → Merge → Import (30 minutes)
+
+USE CASE 3: I'm a developer
+  → Direct edit companyQuestions.ts (5 minutes)
+
+USE CASE 4: My team needs to add questions together
+  → Export CSV → Share Google Sheet → Import (1 hour)
+
+USE CASE 5: Regular questions (e.g., weekly)
+  → Setup recurring CSV workflow (30 minutes setup)
+
+
+════════════════════════════════════════════════════════════════════════════
+
+🐛 COMMON ISSUES
+════════════════════════════════════════════════════════════════════════════
+
+ISSUE: "Question not appearing"
+FIX:   1. Check companyQuestions.ts is saved
+       2. Restart dev server (npm run dev)
+       3. Verify company name spelling
+       4. Check console for errors
+
+ISSUE: "JSON syntax error"
+FIX:   1. Check all commas are in place
+       2. Use jsonlint.com to validate
+       3. Watch for missing quotes
+
+ISSUE: "Admin dashboard not loading"
+FIX:   1. Verify route is /admin
+       2. Check src/app/admin/page.tsx exists
+       3. Clear browser cache
+
+ISSUE: "CSV import not working"
+FIX:   1. Save CSV as UTF-8 encoding
+       2. Check company names match exactly
+       3. Verify all required columns exist
+
+
+════════════════════════════════════════════════════════════════════════════
+
+✅ BEST PRACTICES
+════════════════════════════════════════════════════════════════════════════
+
+1. ALWAYS BACKUP
+   cp src/data/companyQuestions.ts src/data/companyQuestions.backup.ts
+
+2. TEST AFTER ADDING
+   Add question → Reload /company page → Verify it appears
+
+3. USE VERSION CONTROL
+   git add src/data/companyQuestions.ts
+   git commit -m "Add 3 new array questions"
+
+4. KEEP DATA ORGANIZED
+   Group questions by topic (all Array questions together)
+
+5. VALIDATE BEFORE SAVING
+   Check JSON syntax at jsonlint.com
+
+6. MAINTAIN DIFFICULTY RATIO
+   Aim for ~30% Easy, ~50% Medium, ~20% Hard
+
+7. USE CONSISTENT NAMING
+   Company names must match exactly:
+   ✅ Google, Meta, Amazon (correct)
+   ❌ google, GOOGLE, Goog (wrong)
+
+
+════════════════════════════════════════════════════════════════════════════
+
+📞 QUICK HELP
+════════════════════════════════════════════════════════════════════════════
+
+Question: "What's the easiest way to add questions?"
+Answer:   Use /admin dashboard - takes 2 minutes!
+
+Question: "Can I bulk add 50 questions?"
+Answer:   Yes! Export CSV → Edit → Import
+
+Question: "Where do I permanently save questions?"
+Answer:   Copy JSON to src/data/companyQuestions.ts
+
+Question: "Can my team collaborate on questions?"
+Answer:   Yes! Export CSV → Share Google Sheet → Import
+
+Question: "How do I backup my questions?"
+Answer:   /admin → Export CSV or JSON
+
+Question: "Do I need special tools?"
+Answer:   No! Just your browser and a text editor
+
+
+════════════════════════════════════════════════════════════════════════════
+
+🎓 LEARNING PATH
+════════════════════════════════════════════════════════════════════════════
+
+BEGINNER: Use Admin Dashboard
+  Time to learn: 2 minutes
+  Prerequisite: None
+  Use when: Adding 1-5 questions
+
+INTERMEDIATE: CSV Import/Export
+  Time to learn: 10 minutes
+  Prerequisite: Know how CSV works
+  Use when: Adding 5-20 questions
+
+ADVANCED: Direct JSON Editing
+  Time to learn: 15 minutes
+  Prerequisite: JSON/TypeScript knowledge
+  Use when: Quick edits, team integration
+
+
+════════════════════════════════════════════════════════════════════════════
+
+📋 MIGRATION CHECKLIST
+════════════════════════════════════════════════════════════════════════════
+
+Moving from another system? Follow these steps:
+
+[ ] Step 1: Export your questions from old system
+[ ] Step 2: Convert to CSV format (Question, Topic, Difficulty, Companies)
+[ ] Step 3: Go to /admin → Import
+[ ] Step 4: Upload CSV file
+[ ] Step 5: Copy JSON from console
+[ ] Step 6: Paste into companyQuestions.ts
+[ ] Step 7: Test all questions appear at /company
+[ ] Step 8: Git commit: "Migrate existing questions"
+[ ] Done!
+
+
+════════════════════════════════════════════════════════════════════════════
+
+Last Updated: April 15, 2026
+Version: 1.0
