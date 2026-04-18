@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { highlightCode, highlightTheme } from '@/utils/syntaxHighlighter';
 
 interface CodeEditorProps {
   initialCode?: string;
@@ -202,14 +203,26 @@ export default function CodeEditor({
       </div>
 
       <div className="editor-content">
-        <textarea
-          className="code-textarea"
-          value={code}
-          onChange={handleCodeChange}
-          onKeyDown={handleKeyDown}
-          placeholder="Enter your code here..."
-          spellCheck="false"
-        />
+        <div className="code-editor-wrapper">
+          <pre className="code-highlight">
+            {highlightCode(code, selectedLanguage).map((token, idx) => (
+              <span
+                key={idx}
+                style={{ color: highlightTheme[token.type as keyof typeof highlightTheme] }}
+              >
+                {token.value}
+              </span>
+            ))}
+          </pre>
+          <textarea
+            className="code-textarea"
+            value={code}
+            onChange={handleCodeChange}
+            onKeyDown={handleKeyDown}
+            placeholder="Enter your code here..."
+            spellCheck="false"
+          />
+        </div>
       </div>
 
       {showExecute && showOutput && (
@@ -339,22 +352,57 @@ export default function CodeEditor({
           min-height: 300px;
         }
 
-        .code-textarea {
+        .code-editor-wrapper {
+          position: relative;
+          display: flex;
           width: 100%;
           height: 300px;
+          overflow: hidden;
+          border: none;
+          background: white;
+        }
+
+        .code-highlight {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          margin: 0;
+          padding: 12px;
+          background: white;
+          color: #333;
+          font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace;
+          font-size: 14px;
+          line-height: 1.5;
+          white-space: pre-wrap;
+          word-wrap: break-word;
+          pointer-events: none;
+          overflow: hidden;
+          z-index: 1;
+        }
+
+        .code-textarea {
+          flex: 1;
+          position: relative;
+          width: 100%;
+          height: 100%;
           padding: 12px;
           border: none;
           font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace;
           font-size: 14px;
           line-height: 1.5;
           resize: vertical;
-          background: white;
-          color: #333;
+          background: transparent;
+          color: transparent;
+          caret-color: #0066cc;
+          z-index: 2;
+          outline: none;
         }
 
         .code-textarea:focus {
-          outline: none;
-          background: #fafafa;
+          outline: 2px solid #0066cc;
+          outline-offset: -2px;
         }
 
         .output-section {

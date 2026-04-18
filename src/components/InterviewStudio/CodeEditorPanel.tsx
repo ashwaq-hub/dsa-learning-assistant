@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { highlightCode, highlightTheme } from '@/utils/syntaxHighlighter';
 
 interface Problem {
   title: string;
@@ -230,13 +231,25 @@ export default function CodeEditorPanel({
         </div>
       </div>
 
-      <textarea
-        className="code-textarea"
-        value={code}
-        onChange={(e) => setCode(e.target.value)}
-        placeholder="Write your code here..."
-        spellCheck="false"
-      />
+      <div className="code-editor-wrapper">
+        <pre className="code-highlight">
+          {highlightCode(code, language).map((token, idx) => (
+            <span
+              key={idx}
+              style={{ color: highlightTheme[token.type as keyof typeof highlightTheme] }}
+            >
+              {token.value}
+            </span>
+          ))}
+        </pre>
+        <textarea
+          className="code-textarea"
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+          placeholder="Write your code here..."
+          spellCheck="false"
+        />
+      </div>
 
       <div className="output-section">
         <div className="output-header">
@@ -368,28 +381,61 @@ export default function CodeEditorPanel({
           cursor: not-allowed;
         }
 
-        .code-textarea {
+        .code-editor-wrapper {
           flex: 1;
+          position: relative;
+          display: flex;
+          overflow: hidden;
+          border: 1px solid var(--border-color);
+          border-radius: 0.5rem;
+        }
+
+        .code-highlight {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          margin: 0;
           padding: 1rem;
           background: var(--bg-primary);
           color: var(--text-primary);
-          border: 1px solid var(--border-color);
-          border-radius: 0.5rem;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.9rem;
+          line-height: 1.6;
+          tab-size: 2;
+          pointer-events: none;
+          overflow: hidden;
+          white-space: pre-wrap;
+          word-wrap: break-word;
+          z-index: 1;
+        }
+
+        .code-textarea {
+          flex: 1;
+          position: relative;
+          padding: 1rem;
+          background: transparent;
+          color: transparent;
+          caret-color: var(--accent-blue);
+          border: none;
+          border-radius: 0;
           font-family: 'JetBrains Mono', monospace;
           font-size: 0.9rem;
           resize: none;
           line-height: 1.6;
           tab-size: 2;
+          z-index: 2;
+          outline: none;
         }
 
         .code-textarea::placeholder {
-          color: var(--text-tertiary);
+          color: transparent;
         }
 
         .code-textarea:focus {
           outline: none;
-          border-color: var(--accent-blue);
-          box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.1);
+          box-shadow: inset 0 0 0 2px var(--accent-blue);
         }
 
         .output-section {
