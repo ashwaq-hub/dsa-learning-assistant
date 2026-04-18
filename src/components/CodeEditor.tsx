@@ -69,6 +69,9 @@ export default function CodeEditor({
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showOutput, setShowOutput] = useState(false);
+  const [isResolving, setIsResolving] = useState(false);
+  const [resolution, setResolution] = useState('');
+  const [showResolution, setShowResolution] = useState(false);
 
   const handleCodeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newCode = e.target.value;
@@ -161,6 +164,59 @@ export default function CodeEditor({
     setShowOutput(false);
   };
 
+  const getCacheKey = () => {
+    const codeHash = btoa(code.substring(0, 100));
+    return `resolution_code_${selectedLanguage}_${codeHash}`;
+  };
+
+  const handleResolve = useCallback(async () => {
+    if (!error && !output) {
+      setResolution('✅ No errors detected! Code is running successfully.');
+      setShowResolution(true);
+      return;
+    }
+
+    const cacheKey = getCacheKey();
+    const cachedResolution = localStorage.getItem(cacheKey);
+    if (cachedResolution) {
+      setResolution(cachedResolution);
+      setShowResolution(true);
+      return;
+    }
+
+    setIsResolving(true);
+    try {
+      const response = await fetch('/api/resolve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: code.trim(),
+          language: selectedLanguage,
+          problemDescription: questionText || 'Code execution',
+          error: error || undefined,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setResolution(`Error: ${data.error || 'Failed to resolve issue'}`);
+        setShowResolution(true);
+        return;
+      }
+
+      localStorage.setItem(cacheKey, data.resolution);
+      setResolution(data.resolution);
+      setShowResolution(true);
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error';
+      setResolution(`Error: ${errorMsg}\n\nMake sure GOOGLE_GEMINI_API_KEY is set in your environment variables.`);
+      setShowResolution(true);
+    } finally {
+      setIsResolving(false);
+    }
+  }, [code, selectedLanguage, error, output, questionText]);
+
   return (
     <div className="code-editor-container">
       {questionText && (
@@ -195,6 +251,14 @@ export default function CodeEditor({
               disabled={loading}
             >
               {loading ? 'Running...' : 'Run Code'}
+            </button>
+            <button
+              className="btn btn-resolve"
+              onClick={handleResolve}
+              disabled={loading || isResolving}
+              title="Use Gemini AI to resolve errors"
+            >
+              {isResolving ? 'Resolving...' : 'Resolve'}
             </button>
             <button className="btn btn-secondary" onClick={copyCode}>
               Copy
@@ -249,6 +313,24 @@ export default function CodeEditor({
               <pre>{output}</pre>
             </div>
           )}
+        </div>
+      )}
+
+      {showResolution && (
+        <div className="resolution-section">
+          <div className="resolution-header">
+            <h4>🤖 AI Resolution</h4>
+            <button
+              className="close-resolution"
+              onClick={() => setShowResolution(false)}
+              title="Close resolution"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="resolution-content">
+            <pre>{resolution}</pre>
+          </div>
         </div>
       )}
 
@@ -338,6 +420,20 @@ export default function CodeEditor({
         }
 
         .btn-primary:disabled {
+          background: #999;
+          cursor: not-allowed;
+        }
+
+        .btn-resolve {
+          background: #8b5cf6;
+          color: white;
+        }
+
+        .btn-resolve:hover:not(:disabled) {
+          background: #7c3aed;
+        }
+
+        .btn-resolve:disabled {
           background: #999;
           cursor: not-allowed;
         }
@@ -472,6 +568,63 @@ export default function CodeEditor({
         .output-success pre {
           margin: 0;
           color: #333;
+        }
+
+        .resolution-section {
+          border: 1px solid #ddd;
+          border-left: 4px solid #8b5cf6;
+          background: #f9f9f9;
+          border-radius: 4px;
+          padding: 12px 15px;
+          margin: 10px 0;
+          max-height: 300px;
+          overflow-y: auto;
+        }
+
+        .resolution-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 10px;
+          padding-bottom: 10px;
+          border-bottom: 1px solid #ddd;
+        }
+
+        .resolution-header h4 {
+          margin: 0;
+          font-size: 14px;
+          color: #8b5cf6;
+          font-weight: 600;
+        }
+
+        .close-resolution {
+          background: none;
+          border: none;
+          font-size: 18px;
+          cursor: pointer;
+          color: #666;
+          padding: 0;
+        }
+
+        .close-resolution:hover {
+          color: #000;
+        }
+
+        .resolution-content {
+          font-size: 13px;
+          line-height: 1.5;
+          color: #333;
+        }
+
+        .resolution-content pre {
+          margin: 0;
+          white-space: pre-wrap;
+          word-wrap: break-word;
+          background: white;
+          padding: 10px;
+          border-radius: 4px;
+          border: 1px solid #ddd;
+          overflow-x: auto;
         }
 
         @media (max-width: 768px) {

@@ -82,6 +82,9 @@ export default function CodeEditorPanel({
   const [language, setLanguage] = useState('java');
   const [error, setError] = useState('');
   const [testResults, setTestResults] = useState<Array<{ passed: boolean; message: string }>>([]);
+  const [isResolving, setIsResolving] = useState(false);
+  const [resolution, setResolution] = useState('');
+  const [showResolution, setShowResolution] = useState(false);
 
   const handleRunCode = useCallback(async () => {
     if (!code.trim()) {
@@ -198,6 +201,65 @@ export default function CodeEditorPanel({
     setTestResults([]);
   };
 
+  const getCacheKey = () => {
+    // Create a unique cache key based on problem and code
+    const codeHash = btoa(code.substring(0, 100)); // Base64 encode first 100 chars
+    return `resolution_${problem.title}_${language}_${codeHash}`;
+  };
+
+  const handleResolve = useCallback(async () => {
+    // Check if there are any failed tests
+    const failedTests = testResults.filter(t => !t.passed);
+    if (failedTests.length === 0 && !error) {
+      setResolution('✅ All tests are passing! No issues to resolve.');
+      setShowResolution(true);
+      return;
+    }
+
+    // Check cache first
+    const cacheKey = getCacheKey();
+    const cachedResolution = localStorage.getItem(cacheKey);
+    if (cachedResolution) {
+      setResolution(cachedResolution);
+      setShowResolution(true);
+      return;
+    }
+
+    setIsResolving(true);
+    try {
+      const response = await fetch('/api/resolve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: code.trim(),
+          language,
+          problemDescription: problem.description,
+          error: error || undefined,
+          testResults: failedTests.length > 0 ? testResults : undefined,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setResolution(`Error: ${data.error || 'Failed to resolve issue'}`);
+        setShowResolution(true);
+        return;
+      }
+
+      // Cache the resolution
+      localStorage.setItem(cacheKey, data.resolution);
+      setResolution(data.resolution);
+      setShowResolution(true);
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error';
+      setResolution(`Error: ${errorMsg}\n\nMake sure GOOGLE_GEMINI_API_KEY is set in your environment variables.`);
+      setShowResolution(true);
+    } finally {
+      setIsResolving(false);
+    }
+  }, [code, language, problem, error, testResults]);
+
   return (
     <div className="code-editor-panel">
       <div className="editor-header">
@@ -228,6 +290,14 @@ export default function CodeEditorPanel({
             disabled={isRunning}
           >
             {isRunning ? '⏳ Testing...' : '✅ Run Tests'}
+          </button>
+          <button
+            className="btn btn-resolve"
+            onClick={handleResolve}
+            disabled={isRunning || isResolving}
+            title="Use Gemini AI to resolve test failures"
+          >
+            {isResolving ? '🤖 Resolving...' : '🤖 Resolve'}
           </button>
           <button className="btn btn-reset" onClick={handleReset}>
             🔄 Reset
@@ -283,6 +353,24 @@ export default function CodeEditorPanel({
                   <span className="test-message">{result.message}</span>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {showResolution && (
+          <div className="resolution-section">
+            <div className="resolution-header">
+              <h4>🤖 AI Resolution</h4>
+              <button
+                className="close-resolution"
+                onClick={() => setShowResolution(false)}
+                title="Close resolution"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="resolution-content">
+              <pre>{resolution}</pre>
             </div>
           </div>
         )}
@@ -367,6 +455,16 @@ export default function CodeEditorPanel({
 
         .btn-test:hover:not(:disabled) {
           background: #059669;
+          transform: scale(1.02);
+        }
+
+        .btn-resolve {
+          background: #8b5cf6;
+          color: white;
+        }
+
+        .btn-resolve:hover:not(:disabled) {
+          background: #7c3aed;
           transform: scale(1.02);
         }
 
@@ -547,6 +645,69 @@ export default function CodeEditorPanel({
           white-space: nowrap;
           line-height: 1.2;
           flex: 1;
+        }
+
+        .resolution-section {
+          background: var(--bg-primary);
+          border-top: 1px solid var(--border-color);
+          border-left: 3px solid #8b5cf6;
+          padding: 1rem;
+          max-height: 250px;
+          overflow-y: auto;
+        }
+
+        .resolution-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 0.75rem;
+          padding-bottom: 0.75rem;
+          border-bottom: 1px solid var(--border-color);
+        }
+
+        .resolution-header h4 {
+          margin: 0;
+          font-size: 0.9rem;
+          color: #8b5cf6;
+          font-weight: 600;
+        }
+
+        .close-resolution {
+          background: none;
+          border: none;
+          color: var(--text-secondary);
+          cursor: pointer;
+          font-size: 1rem;
+          padding: 0;
+          width: 24px;
+          height: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s;
+        }
+
+        .close-resolution:hover {
+          color: var(--text-primary);
+          background: var(--border-color);
+          border-radius: 0.25rem;
+        }
+
+        .resolution-content {
+          font-size: 0.85rem;
+          line-height: 1.5;
+          color: var(--text-secondary);
+        }
+
+        .resolution-content pre {
+          margin: 0;
+          white-space: pre-wrap;
+          word-wrap: break-word;
+          background: var(--bg-secondary);
+          padding: 0.75rem;
+          border-radius: 0.375rem;
+          border: 1px solid var(--border-color);
+          overflow-x: auto;
         }
 
         @media (max-width: 768px) {
