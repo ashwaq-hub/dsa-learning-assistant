@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ProblemPanel from './ProblemPanel';
 import CodeEditorPanel from './CodeEditorPanel';
 import InterviewTimer from './InterviewTimer';
-import { problems } from '@/data/interviewProblems';
+import { problems as defaultProblems } from '@/data/interviewProblems';
 
 export default function InterviewStudioLayout() {
+  const [problems, setProblems] = useState(defaultProblems);
   const [currentProblemIdx, setCurrentProblemIdx] = useState(0);
   const [isInterviewMode, setIsInterviewMode] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
@@ -14,7 +15,21 @@ export default function InterviewStudioLayout() {
   const [output, setOutput] = useState('');
   const [isRunning, setIsRunning] = useState(false);
 
-  const currentProblem = problems[currentProblemIdx];
+  // Load custom problems from localStorage
+  useEffect(() => {
+    try {
+      const customProblems = localStorage.getItem('interviewProblems');
+      if (customProblems) {
+        const parsed = JSON.parse(customProblems);
+        // Combine default and custom problems
+        setProblems([...defaultProblems, ...parsed]);
+      }
+    } catch (error) {
+      console.error('Failed to load custom problems:', error);
+    }
+  }, []);
+
+  const currentProblem = problems[currentProblemIdx] || problems[0];
 
   const handleStartInterview = (difficulty: 'easy' | 'medium' | 'hard') => {
     const timeMap = { easy: 20 * 60, medium: 45 * 60, hard: 60 * 60 };

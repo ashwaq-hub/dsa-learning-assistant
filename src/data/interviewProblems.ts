@@ -217,4 +217,304 @@ You must follow the rules:
   return 0;
 }`,
   },
+  {
+    title: 'Parking Lot System',
+    shortDescription: 'Design a multi-level parking lot management system',
+    description: `Design a parking lot system that supports multiple parking levels. Each level has multiple rows and each row has multiple spots.
+
+The system should:
+1. Support adding a vehicle (car, truck, motorcycle) to a spot
+2. Track available spots by type
+3. Remove a vehicle from a spot
+4. Get available spot count for each vehicle type
+5. Handle overflow to next available level
+6. Calculate parking fee based on duration
+
+Classes/Interfaces needed:
+- ParkingLot
+- Level
+- Row
+- Spot
+- Vehicle (Car, Truck, Motorcycle)
+- ParkingTicket
+
+Requirements:
+- A motorcycle needs 1 spot
+- A car needs 1 spot
+- A truck needs 2 spots
+- Ensure proper encapsulation and single responsibility
+- Use design patterns (Singleton for ParkingLot, Strategy for Vehicle)`,
+    examples: [
+      {
+        input: 'Create lot with 4 levels, 10 rows/level, 15 spots/row. Park 1 truck, 2 cars, 1 motorcycle. Check availability.',
+        output: 'Truck parked at Level 0, Row 0, Car parked at Level 0, Row 0, available spots updated correctly',
+      },
+    ],
+    constraints: [
+      'Support SOLID principles',
+      'Implement proper error handling',
+      'Support extensible vehicle types',
+      'Time complexity for operations: O(1) for parking, O(1) for unparking',
+    ],
+    timeComplexity: 'O(1) for all operations',
+    spaceComplexity: 'O(L * R * S) where L=levels, R=rows, S=spots',
+    topics: ['Object-Oriented Design', 'SOLID Principles', 'Design Patterns'],
+    difficulty: 'hard',
+    estimatedTime: 60,
+    starterCode: `class ParkingLot {
+  constructor(levels, rowsPerLevel, spotsPerRow) {
+    // Initialize parking lot structure
+  }
+
+  addLevel(level) {
+    // Add a new level
+  }
+
+  parkVehicle(vehicle) {
+    // Park a vehicle - return ticket or null if failed
+  }
+
+  unparkVehicle(ticket) {
+    // Unpark a vehicle - return availability update
+  }
+
+  getAvailableSpots(vehicleType) {
+    // Get available spots for vehicle type
+  }
+}`,
+  },
+  {
+    title: 'Club Membership System',
+    shortDescription: 'Design a club membership and booking system',
+    description: `Design a system for a club that manages members, resources (courts, tables, rooms), and bookings.
+
+Requirements:
+1. Member management (add, remove, update)
+2. Resource management (courts, tables, rooms)
+3. Booking system with time slots
+4. Cancellation support
+5. Member benefits and tiers (basic, premium, VIP)
+6. Payment processing
+7. Availability checking
+
+Classes needed:
+- Club
+- Member
+- Resource
+- Booking
+- TimeSlot
+- PaymentProcessor
+
+Constraints:
+- A member cannot book overlapping time slots
+- Premium members get priority booking
+- VIP members get discounts
+- Resources have different pricing based on member tier`,
+    examples: [
+      {
+        input: 'Club with 5 courts. Create basic member. Try to book court for 2 hours at 10 AM.',
+        output: 'Booking created with ticket. Available slots updated.',
+      },
+    ],
+    constraints: [
+      'Use composition over inheritance',
+      'Implement proper validation',
+      'Support different payment methods',
+      'Handle concurrent bookings safely',
+    ],
+    timeComplexity: 'O(n) for availability checking where n is number of bookings',
+    spaceComplexity: 'O(m * s) where m=members, s=slots',
+    topics: ['Object-Oriented Design', 'SOLID Principles', 'Business Logic'],
+    difficulty: 'hard',
+    estimatedTime: 60,
+    starterCode: `class Club {
+  constructor(name) {
+    this.name = name;
+    this.members = new Map();
+    this.resources = new Map();
+    this.bookings = [];
+  }
+
+  addMember(member) {
+    // Add member to club
+  }
+
+  addResource(resource) {
+    // Add resource (court, table, room)
+  }
+
+  createBooking(member, resource, timeSlot) {
+    // Create booking - validate and return confirmation
+  }
+
+  cancelBooking(bookingId) {
+    // Cancel booking
+  }
+
+  getAvailableSlots(resource) {
+    // Get available time slots for resource
+  }
+}`,
+  },
+  {
+    title: 'Speed Ticket Management System',
+    shortDescription: 'Design a traffic enforcement and ticket management system',
+    description: `Design a speed ticket management system for traffic enforcement agencies.
+
+Requirements:
+1. Record speed violations
+2. Generate tickets with fines
+3. Track payment status
+4. Support appeals
+5. Generate reports
+6. Calculate fines based on speed, location, vehicle type
+7. Handle discounts for early payment
+8. Track officer performance
+
+Classes needed:
+- TrafficOfficer
+- Violation
+- Ticket
+- Vehicle
+- Payment
+- Appeal
+- Location
+
+Business Rules:
+- Fine = Base fine + (Speed over limit) * Rate
+- 10% discount if paid within 7 days
+- Drivers can appeal within 30 days
+- Different rates for different locations
+- Commercial vehicles pay more`,
+    examples: [
+      {
+        input: 'Speed limit 55 mph, car going 75 mph, location factor 1.0',
+        output: 'Ticket generated with fine calculated',
+      },
+    ],
+    constraints: [
+      'Calculate fines accurately',
+      'Audit trail for all transactions',
+      'Support dispute resolution',
+      'Generate statistical reports',
+    ],
+    timeComplexity: 'O(1) for ticket creation, O(n) for reporting',
+    spaceComplexity: 'O(t) where t is number of tickets',
+    topics: ['Object-Oriented Design', 'Business Logic', 'Reporting'],
+    difficulty: 'hard',
+    estimatedTime: 45,
+    starterCode: `class TrafficEnforcementSystem {
+  constructor() {
+    this.tickets = new Map();
+    this.appeals = new Map();
+    this.locations = new Map();
+  }
+
+  recordViolation(officer, vehicle, speed, speedLimit, location) {
+    // Record violation and create ticket
+  }
+
+  processPayment(ticketId, amount) {
+    // Process payment for ticket
+  }
+
+  fileAppeal(ticketId, reason) {
+    // File appeal against ticket
+  }
+
+  calculateFine(speed, speedLimit, location, vehicleType) {
+    // Calculate fine based on parameters
+  }
+
+  getReport(startDate, endDate) {
+    // Generate report for period
+  }
+}`,
+  },
+  {
+    title: 'Matrix Game - Snake',
+    shortDescription: 'Implement Snake game with object-oriented design',
+    description: `Implement a Snake game on an NxN matrix with proper OOP design.
+
+Requirements:
+1. Initialize game board with snake starting at center
+2. Generate food randomly
+3. Handle snake movement (up, down, left, right)
+4. Detect collisions (wall, self)
+5. Handle food consumption (grow snake)
+6. Track score
+7. Game over detection
+8. Display game state
+
+Classes needed:
+- Game
+- Snake (head and body segments)
+- Food
+- Board
+- Direction
+- GameState
+
+Game Rules:
+- Snake starts with length 3
+- Snake moves in current direction each tick
+- Eating food increases length and score
+- Cannot reverse into self
+- Game ends on wall collision or self collision`,
+    examples: [
+      {
+        input: 'Initialize 10x10 board with snake starting at (5,5)',
+        output: 'Board created, snake positioned, food placed',
+      },
+      {
+        input: 'Move snake: RIGHT, RIGHT, DOWN, food at (7,6)',
+        output: 'Snake eats food, length=4, score=10',
+      },
+    ],
+    constraints: [
+      'Efficient collision detection O(1)',
+      'Proper encapsulation of game state',
+      'Support save/load game state',
+      'Rendering-agnostic design',
+    ],
+    timeComplexity: 'O(1) per move',
+    spaceComplexity: 'O(n) where n is snake length',
+    topics: ['Object-Oriented Design', 'Game Logic', 'State Management'],
+    difficulty: 'medium',
+    estimatedTime: 40,
+    starterCode: `class SnakeGame {
+  constructor(boardSize) {
+    this.boardSize = boardSize;
+    this.snake = [];
+    this.food = null;
+    this.score = 0;
+    this.direction = 'RIGHT';
+    this.gameOver = false;
+    this.initializeGame();
+  }
+
+  initializeGame() {
+    // Initialize snake in center, place first food
+  }
+
+  move() {
+    // Move snake in current direction
+  }
+
+  setDirection(newDirection) {
+    // Set snake direction (validate no reversal)
+  }
+
+  checkCollision() {
+    // Check wall and self collision
+  }
+
+  checkFoodCollision() {
+    // Check if snake ate food
+  }
+
+  getGameState() {
+    // Return current game state for rendering
+  }
+}`,
+  },
 ];

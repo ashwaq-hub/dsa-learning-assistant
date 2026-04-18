@@ -24,13 +24,13 @@ interface CodeEditorPanelProps {
 }
 
 const LANGUAGE_MAP: Record<string, string> = {
-  'javascript': '63',
-  'python': '71',
-  'java': '62',
-  'cpp': '54',
-  'c': '50',
-  'go': '60',
-  'csharp': '51',
+  'javascript': '63',  // Node.js
+  'python': '71',      // Python 3
+  'java': '91',        // Java (OpenJDK 13.0.1)
+  'cpp': '54',         // C++ (GCC 9.2.0)
+  'c': '50',           // C (GCC 9.2.0)
+  'go': '60',          // Go (1.13.5)
+  'csharp': '51',      // C# (Mono 6.4.0)
 };
 
 export default function CodeEditorPanel({
