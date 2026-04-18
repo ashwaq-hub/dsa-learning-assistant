@@ -107,16 +107,20 @@ export default function CodeEditorPanel({
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || 'Execution failed');
+        setError(data.error || data.message || 'Execution failed');
         setOutput('');
         return;
       }
 
-      if (data.error) {
-        setError(data.error);
-        setOutput('');
+      // Handle the response
+      if (data.error || data.statusId > 3) {
+        // There's a compile or runtime error
+        const errorMsg = data.error || data.message || `Execution error: ${data.status}`;
+        setError(errorMsg);
+        setOutput(data.output || '');
       } else {
-        setOutput(data.output || '(No output)');
+        // Successful execution
+        setOutput(data.output ? data.output.trim() : '(No output)');
         setError('');
       }
     } catch (err) {
@@ -539,47 +543,4 @@ export default function CodeEditorPanel({
 
         .test-message {
           overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          line-height: 1.2;
-          flex: 1;
-        }
-
-        @media (max-width: 768px) {
-          .code-editor-panel {
-            height: auto;
-          }
-
-          .editor-header {
-            flex-direction: column;
-            align-items: stretch;
-          }
-
-          .language-selector {
-            width: 100%;
-          }
-
-          .editor-actions {
-            width: 100%;
-          }
-
-          .btn {
-            flex: 1;
-            min-width: 0;
-          }
-
-          .output-section {
-            max-height: 150px;
-          }
-
-          .code-textarea {
-            font-size: 0.85rem;
-            min-height: 300px;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-          }
-        }
-      `}</style>
-    </div>
-  );
-}
+          text-overflow: ellips

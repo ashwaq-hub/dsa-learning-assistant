@@ -109,16 +109,20 @@ export default function CodeEditor({
       const result = await response.json();
 
       if (!response.ok) {
-        setError(result.error || 'Execution failed');
+        setError(result.error || result.message || 'Execution failed');
         setOutput('');
         return;
       }
 
-      if (result.error) {
-        setError(result.error);
-        setOutput('');
+      // Handle the response
+      if (result.error || result.statusId > 3) {
+        // There's a compile or runtime error
+        const errorMsg = result.error || result.message || `Execution error: ${result.status}`;
+        setError(errorMsg);
+        setOutput(result.output || '');
       } else {
-        setOutput(result.output || '(No output)');
+        // Successful execution
+        setOutput(result.output ? result.output.trim() : '(No output)');
         setError('');
       }
     } catch (err) {

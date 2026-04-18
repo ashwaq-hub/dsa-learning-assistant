@@ -64,13 +64,25 @@ export async function POST(request: NextRequest) {
 
     const result = await submitResponse.json();
 
+    // Judge0 status codes: 1=Queue, 2=Processing, 3=Accepted, 4+=Error
+    const isSuccess = result.status?.id === 3;
+    const hasCompileError = result.status?.id === 6;
+    const hasRuntimeError = result.status?.id >= 7 && result.status?.id <= 12;
+
+    // Capture output from different possible response formats
+    const output = result.stdout || result.output || '';
+    const error = result.stderr || '';
+    const compileError = result.compile_output || '';
+
     return NextResponse.json({
-      success: true,
+      success: isSuccess,
       language,
-      output: result.stdout || '',
-      error: result.stderr || '',
-      exitCode: result.status?.id === 3 ? 0 : 1,
+      output: output,
+      error: error || compileError,
+      exitCode: isSuccess ? 0 : 1,
       status: result.status?.description || 'Unknown',
+      statusId: result.status?.id,
+      message: isSuccess ? 'Code executed successfully' : `Execution failed with status: ${result.status?.description}`,
     });
   } catch (error) {
     console.error('Code execution error:', error);

@@ -952,19 +952,4 @@ export default function InterviewStudioLayout() {
             grid-template-columns: 1fr;
           }
 
-          .studio-pane {
-            padding: 1rem;
-          }
-
-          .modal-overlay {
-            padding: 0.5rem;
-          }
-
-          .modal-content {
-            max-height: 90vh;
-          }
-        }
-      `}</style>
-    </div>
-  );
-}
+          .studio-pane

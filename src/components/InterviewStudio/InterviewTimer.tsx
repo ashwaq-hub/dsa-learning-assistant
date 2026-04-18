@@ -98,16 +98,4 @@ export default function InterviewTimer({
           }
         }
 
-        @media (max-width: 768px) {
-          .timer-display {
-            font-size: 1.25rem;
-          }
-
-          .timer-label {
-            font-size: 1rem;
-          }
-        }
-      `}</style>
-    </div>
-  );
-}
+        @media (max-width: 768px
