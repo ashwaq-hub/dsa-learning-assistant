@@ -17,6 +17,7 @@ All markdown and documentation files are organized in this folder.
 - **[COMPETITIVE_ANALYSIS_AND_IMPROVEMENTS.md](./COMPETITIVE_ANALYSIS_AND_IMPROVEMENTS.md)** - Feature comparison
 - **[RESOLVE_SETUP.md](./RESOLVE_SETUP.md)** - Gemini AI Resolve feature setup
 - **[SOLUTION_CACHING.md](./SOLUTION_CACHING.md)** - Solution caching and persistence
+- **[TEST_SYSTEM_IMPLEMENTATION.md](./TEST_SYSTEM_IMPLEMENTATION.md)** - Test case system overview
 
 ## 🎨 Theme & UI
 
