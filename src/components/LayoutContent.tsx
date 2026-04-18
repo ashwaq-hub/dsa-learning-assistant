@@ -30,7 +30,7 @@ export default function LayoutContent({ children }: { children: ReactNode }) {
             <a href="/solver" className="nav-link">Problem Solver</a>
             <a href="/flashcards" className="nav-link">Flashcards</a>
             <a href="/interview" className="nav-link">Interview</a>
-            <a href="/interview-studio" className="nav-link nav-link-studio">Studio</a>
+            <a href="/interview-studio" className="nav-link nav-link-studio">🎤 Studio</a>
             <a href="/visual" className="nav-link">Visualize</a>
             <a href="/code-editor" className="nav-link">Code Compiler</a>
             <a href="/company" className="nav-link">Companies</a>
@@ -62,7 +62,7 @@ export default function LayoutContent({ children }: { children: ReactNode }) {
             <a href="/solver" className="nav-link-mobile" onClick={closeMobileMenu}>Problem Solver</a>
             <a href="/flashcards" className="nav-link-mobile" onClick={closeMobileMenu}>Flashcards</a>
             <a href="/interview" className="nav-link-mobile" onClick={closeMobileMenu}>Interview</a>
-            <a href="/interview-studio" className="nav-link-mobile nav-link-studio-mobile" onClick={closeMobileMenu}>Interview Studio</a>
+            <a href="/interview-studio" className="nav-link-mobile nav-link-studio-mobile" onClick={closeMobileMenu}>🎤 Interview Studio</a>
             <a href="/visual" className="nav-link-mobile" onClick={closeMobileMenu}>Visualize</a>
             <a href="/code-editor" className="nav-link-mobile" onClick={closeMobileMenu}>Code Compiler</a>
             <a href="/company" className="nav-link-mobile" onClick={closeMobileMenu}>Companies</a>

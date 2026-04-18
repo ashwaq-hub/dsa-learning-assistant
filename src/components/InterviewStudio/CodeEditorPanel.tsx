@@ -80,6 +80,7 @@ export default function CodeEditorPanel({
 }: CodeEditorPanelProps) {
   const [language, setLanguage] = useState('javascript');
   const [error, setError] = useState('');
+  const [testResults, setTestResults] = useState<Array<{ passed: boolean; message: string }>>([]);
 
   const handleRunCode = useCallback(async () => {
     if (!code.trim()) {
@@ -133,10 +134,63 @@ export default function CodeEditorPanel({
     setError('');
   };
 
+  const handleRunTestCases = useCallback(async () => {
+    setIsRunning(true);
+    setTestResults([]);
+    setError('');
+    setOutput('Running test cases...');
+
+    try {
+      const results = [];
+      for (let i = 0; i < problem.examples.length; i++) {
+        const example = problem.examples[i];
+
+        const response = await fetch('/api/execute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            language: language,
+            code: code.trim(),
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          results.push({
+            passed: false,
+            message: `Test ${i + 1}: Error - ${data.error || 'Execution failed'}`,
+          });
+          continue;
+        }
+
+        const result = (data.output || '').trim();
+        const expected = example.output.trim();
+        const passed = result === expected;
+
+        results.push({
+          passed,
+          message: `Test ${i + 1}: Input: ${example.input} | Expected: ${expected} | Got: ${result}`,
+        });
+      }
+
+      setTestResults(results);
+      const passedCount = results.filter((r) => r.passed).length;
+      setOutput(`✅ Test Results: ${passedCount}/${results.length} passed`);
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error';
+      setError(`Error: ${errorMsg}`);
+      setOutput('');
+    } finally {
+      setIsRunning(false);
+    }
+  }, [code, language, problem.examples, setIsRunning]);
+
   const handleReset = () => {
     setCode(codeTemplates[language] || '');
     setOutput('');
     setError('');
+    setTestResults([]);
   };
 
   return (
@@ -163,6 +217,13 @@ export default function CodeEditorPanel({
           >
             {isRunning ? '⏳ Running...' : '▶️ Run Code'}
           </button>
+          <button
+            className="btn btn-test"
+            onClick={handleRunTestCases}
+            disabled={isRunning}
+          >
+            {isRunning ? '⏳ Testing...' : '✅ Run Tests'}
+          </button>
           <button className="btn btn-reset" onClick={handleReset}>
             🔄 Reset
           </button>
@@ -180,11 +241,33 @@ export default function CodeEditorPanel({
       <div className="output-section">
         <div className="output-header">
           <h3>Output</h3>
+          {testResults.length > 0 && (
+            <span className="test-summary">
+              {testResults.filter((r) => r.passed).length}/{testResults.length} passed
+            </span>
+          )}
         </div>
         {error ? (
           <pre className="output-content error">{error}</pre>
         ) : (
           <pre className="output-content">{output || 'Run your code to see output...'}</pre>
+        )}
+
+        {testResults.length > 0 && (
+          <div className="test-results">
+            <h4>Test Case Results:</h4>
+            <div className="results-list">
+              {testResults.map((result, idx) => (
+                <div
+                  key={idx}
+                  className={`test-result ${result.passed ? 'passed' : 'failed'}`}
+                >
+                  <span className="test-icon">{result.passed ? '✅' : '❌'}</span>
+                  <span className="test-message">{result.message}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
       </div>
 
@@ -257,6 +340,16 @@ export default function CodeEditorPanel({
 
         .btn-run:hover:not(:disabled) {
           background: #22c55e;
+          transform: scale(1.02);
+        }
+
+        .btn-test {
+          background: #10b981;
+          color: white;
+        }
+
+        .btn-test:hover:not(:disabled) {
+          background: #059669;
           transform: scale(1.02);
         }
 
@@ -340,6 +433,67 @@ export default function CodeEditorPanel({
         .output-content.error {
           color: var(--accent-red);
           background: rgba(255, 107, 107, 0.05);
+        }
+
+        .test-summary {
+          font-size: 0.75rem;
+          padding: 0.25rem 0.75rem;
+          background: rgba(34, 197, 94, 0.2);
+          color: var(--accent-green);
+          border-radius: 9999px;
+          font-weight: 600;
+        }
+
+        .test-results {
+          background: var(--bg-primary);
+          border-top: 1px solid var(--border-color);
+          padding: 0.75rem 1rem;
+          max-height: 150px;
+          overflow-y: auto;
+        }
+
+        .test-results h4 {
+          margin: 0 0 0.75rem 0;
+          font-size: 0.85rem;
+          color: var(--text-secondary);
+        }
+
+        .results-list {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+
+        .test-result {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.5rem;
+          border-radius: 0.375rem;
+          font-size: 0.8rem;
+        }
+
+        .test-result.passed {
+          background: rgba(34, 197, 94, 0.1);
+          color: var(--accent-green);
+        }
+
+        .test-result.failed {
+          background: rgba(239, 68, 68, 0.1);
+          color: var(--accent-red);
+        }
+
+        .test-icon {
+          flex-shrink: 0;
+          font-size: 0.9rem;
+        }
+
+        .test-message {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          line-height: 1.2;
+          flex: 1;
         }
 
         @media (max-width: 768px) {
