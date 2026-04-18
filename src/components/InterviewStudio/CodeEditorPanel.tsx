@@ -370,6 +370,7 @@ export default function CodeEditorPanel({
 
         .code-textarea {
           flex: 1;
+          min-height: 0;
           padding: 1rem;
           background: var(--bg-primary);
           color: var(--text-primary);
@@ -380,6 +381,8 @@ export default function CodeEditorPanel({
           resize: none;
           line-height: 1.6;
           tab-size: 2;
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
         }
 
         .code-textarea::placeholder {
@@ -497,6 +500,10 @@ export default function CodeEditorPanel({
         }
 
         @media (max-width: 768px) {
+          .code-editor-panel {
+            height: auto;
+          }
+
           .editor-header {
             flex-direction: column;
             align-items: stretch;
@@ -521,6 +528,9 @@ export default function CodeEditorPanel({
 
           .code-textarea {
             font-size: 0.85rem;
+            min-height: 300px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
           }
         }
       `}</style>

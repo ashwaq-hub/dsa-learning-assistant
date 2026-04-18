@@ -886,18 +886,25 @@ export default function InterviewStudioLayout() {
         @media (max-width: 1024px) {
           .studio-container {
             flex-direction: column;
+            overflow-y: auto;
           }
 
           .studio-pane {
-            flex: 1;
+            flex: none;
             min-height: 50vh;
-            max-height: 50vh;
             padding: 1.5rem;
+            -webkit-overflow-scrolling: touch;
           }
 
           .problem-pane {
+            max-height: 50vh;
             border-right: none;
             border-bottom: 1px solid var(--border-color);
+          }
+
+          .code-pane {
+            min-height: 60vh;
+            overflow: visible;
           }
 
           .studio-divider {
