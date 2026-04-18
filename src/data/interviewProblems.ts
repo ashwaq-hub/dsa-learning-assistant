@@ -517,4 +517,296 @@ Game Rules:
   }
 }`,
   },
+  {
+    title: 'LRU Cache Implementation',
+    shortDescription: 'Implement an efficient Least Recently Used cache',
+    description: `Design and implement an LRU (Least Recently Used) Cache that supports:
+1. get(key) - Return value if key exists, else -1
+2. put(key, value) - Update value or insert if not present
+
+When cache reaches capacity, evict least recently used item.
+
+Requirements:
+- Both get and put operations should run in O(1) time
+- Track usage order efficiently
+- Handle edge cases (duplicate keys, capacity of 1)
+
+Data Structure Hint:
+- Use HashMap for O(1) key lookup
+- Use Doubly Linked List to maintain LRU order
+- Combine both for optimal performance
+
+Example:
+- Cache capacity = 2
+- put(1, 1) → Cache: {1:1}
+- put(2, 2) → Cache: {1:1, 2:2}
+- get(1) → Returns 1, 1 becomes most recent
+- put(3, 3) → Evicts 2, Cache: {1:1, 3:3}
+- get(2) → Returns -1`,
+    examples: [
+      {
+        input: 'LRUCache(2), put(1,1), put(2,2), get(1) -> 1, put(3,3), get(2)',
+        output: '1 (get result), -1 (2 was evicted)',
+      },
+    ],
+    constraints: [
+      'Capacity >= 1',
+      '1 <= key, value <= 10^5',
+      'Maximum 10^5 calls',
+      'O(1) time complexity for all operations',
+    ],
+    timeComplexity: 'O(1) for get and put',
+    spaceComplexity: 'O(capacity)',
+    topics: ['Hash Map', 'Linked List', 'Cache Design', 'Data Structure Design'],
+    difficulty: 'hard',
+    estimatedTime: 45,
+    starterCode: `class LRUCache {
+  constructor(capacity) {
+    this.capacity = capacity;
+    // Use Map for insertion order
+    this.cache = new Map();
+  }
+
+  get(key) {
+    // Return value and update order
+    return -1;
+  }
+
+  put(key, value) {
+    // Insert or update, maintain LRU order
+    // Evict if capacity exceeded
+  }
+}`,
+  },
+  {
+    title: 'Rate Limiter (Token Bucket)',
+    shortDescription: 'Implement a rate limiter using token bucket algorithm',
+    description: `Implement a rate limiter using the Token Bucket algorithm that allows:
+- N requests per second from each user
+- Smooth burst traffic handling
+
+Requirements:
+1. isAllowed(userId, requestTime) - Checks if request should be allowed
+2. Refill tokens at a constant rate
+3. Each request consumes 1 token
+4. Bucket capacity = N (refill rate)
+
+Algorithm:
+- Maintain token count per user
+- At each request, refill tokens since last request
+- Allow request if tokens >= 1
+- Decrement token count
+
+Example (rate = 2 tokens/sec):
+- t=0s: 0 requests → allow (tokens: 1, used: 1)
+- t=0.1s: allow (tokens: 1.2 → 0.2 after use)
+- t=0.5s: allow (tokens: 1.8 → 0.8 after use)
+- t=0.6s: deny (tokens: 1.0 → not enough for 2nd request)
+- t=1.0s: allow (tokens: 1.8 → 0.8 after use)`,
+    examples: [
+      {
+        input: 'capacity=2, refillRate=2/sec, requests at t=0, 0.1, 0.5, 0.6',
+        output: 'allow, allow, allow, deny',
+      },
+    ],
+    constraints: [
+      'Accurate timestamp handling',
+      'Thread-safe if concurrent calls',
+      'Handle multiple users independently',
+      'Precision: milliseconds',
+    ],
+    timeComplexity: 'O(1) per request',
+    spaceComplexity: 'O(users) for tracking user buckets',
+    topics: ['Algorithm', 'Rate Limiting', 'System Design'],
+    difficulty: 'hard',
+    estimatedTime: 40,
+    starterCode: `class RateLimiter {
+  constructor(capacity, refillRate) {
+    this.capacity = capacity;
+    this.refillRate = refillRate; // tokens per second
+    this.userBuckets = new Map();
+  }
+
+  isAllowed(userId, currentTime) {
+    // Check if request is allowed
+    // Refill tokens since last request
+    // Return true/false
+    return false;
+  }
+
+  refillTokens(lastTime, currentTime) {
+    // Calculate tokens to add
+    return 0;
+  }
+}`,
+  },
+  {
+    title: 'Web Crawler with Thread Pool',
+    shortDescription: 'Design a multi-threaded web crawler system',
+    description: `Design a web crawler that can crawl websites efficiently using a thread pool.
+
+Requirements:
+1. Crawl pages starting from a root URL
+2. Extract links from pages
+3. Visit each link only once
+4. Use thread pool for parallel crawling
+5. Respect rate limiting (don't overload servers)
+6. Handle errors gracefully
+7. Extract metadata (title, links, content)
+
+Key Considerations:
+- Thread safety for shared data structures
+- Synchronization for concurrent access
+- Preventing duplicate URL visits
+- Handling circular links
+- Respecting robots.txt
+- URL normalization (www.x.com vs x.com)
+
+Classes Needed:
+- WebCrawler
+- CrawlTask
+- CrawledPage
+- ThreadPool
+- URLQueue
+- URLCache
+
+Edge Cases:
+- Circular references (A → B → A)
+- Dead links
+- Redirects (301, 302, 303)
+- Same content at different URLs
+- Maximum crawl depth`,
+    examples: [
+      {
+        input: 'Crawl google.com with max depth 2, thread pool size 4',
+        output: 'Crawled N pages, M unique links found',
+      },
+    ],
+    constraints: [
+      'Thread pool size configurable',
+      'Maximum crawl depth limit',
+      'Connection timeout handling',
+      'DNS resolution caching',
+      'Rate limiting per domain',
+    ],
+    timeComplexity: 'O(pages + links) distributed across threads',
+    spaceComplexity: 'O(pages + urls) for caching',
+    topics: ['Concurrency', 'System Design', 'Web Crawling', 'Thread Pool'],
+    difficulty: 'hard',
+    estimatedTime: 60,
+    starterCode: `class WebCrawler {
+  constructor(threadPoolSize, maxDepth) {
+    this.threadPoolSize = threadPoolSize;
+    this.maxDepth = maxDepth;
+    this.visitedUrls = new Set();
+    this.queue = [];
+  }
+
+  crawl(startUrl) {
+    // Initialize with start URL
+    // Process queue with thread pool
+    // Return crawl results
+    return [];
+  }
+
+  fetchPage(url) {
+    // Fetch page and extract links
+    // Handle errors
+    return null;
+  }
+
+  extractLinks(htmlContent, baseUrl) {
+    // Parse HTML and extract links
+    // Normalize URLs
+    return [];
+  }
+
+  normalizeUrl(url) {
+    // Normalize URL for comparison
+    return url;
+  }
+}`,
+  },
+  {
+    title: 'Distributed Cache with Consistency',
+    shortDescription: 'Design a distributed cache with cache invalidation',
+    description: `Design a distributed cache system with cache invalidation and consistency protocols.
+
+Requirements:
+1. Multiple cache nodes
+2. Cache invalidation strategies
+3. Data consistency across nodes
+4. Replication strategy
+5. Fault tolerance
+6. Cache eviction policies
+
+Consistency Strategies:
+- Write-Through: Write to cache and DB
+- Write-Behind: Write to cache, async to DB
+- Write-Around: Bypass cache on write
+
+Invalidation Strategies:
+- Time-based (TTL)
+- Event-based (subscribers)
+- LRU/LFU eviction
+- Explicit invalidation
+
+Replication:
+- Master-Slave
+- Peer-to-Peer
+- Quorum-based
+
+Classes Needed:
+- DistributedCache
+- CacheNode
+- ConsistencyProtocol
+- ReplicationManager
+- InvalidationStrategy`,
+    examples: [
+      {
+        input: 'Create cache with 3 nodes, write-through consistency, TTL=5min',
+        output: 'Distributed cache initialized with replication',
+      },
+    ],
+    constraints: [
+      'Handle node failures',
+      'Eventual consistency acceptable',
+      'Network partition tolerance',
+      'Configurable replication factor',
+      'Monitor hit/miss ratios',
+    ],
+    timeComplexity: 'O(1) reads/writes (with network latency)',
+    spaceComplexity: 'O(n) across all cache nodes',
+    topics: ['Distributed Systems', 'Caching', 'Consistency Models', 'Replication'],
+    difficulty: 'hard',
+    estimatedTime: 60,
+    starterCode: `class DistributedCache {
+  constructor(nodes, consistencyType, replicationFactor) {
+    this.nodes = nodes;
+    this.consistencyType = consistencyType;
+    this.replicationFactor = replicationFactor;
+  }
+
+  get(key) {
+    // Retrieve from cache
+    // Handle missing data
+    return null;
+  }
+
+  put(key, value) {
+    // Write to cache
+    // Apply consistency strategy
+    // Replicate across nodes
+  }
+
+  invalidate(key) {
+    // Invalidate across all nodes
+  }
+
+  handleNodeFailure(nodeId) {
+    // Rebalance data
+    // Ensure consistency
+  }
+}`,
+  },
 ];

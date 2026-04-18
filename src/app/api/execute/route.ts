@@ -10,13 +10,13 @@ interface ExecutionRequest {
 
 // Language ID mapping for Judge0
 const languageMap: Record<string, number> = {
-  javascript: 63,
-  python: 71,
-  java: 62,
-  go: 60,
-  c: 50,
-  cpp: 54,
-  csharp: 51,
+  javascript: 63,    // Node.js
+  python: 71,        // Python 3
+  java: 91,          // Java (OpenJDK 13.0.1) - UPDATED
+  go: 60,            // Go
+  c: 50,             // C
+  cpp: 54,           // C++
+  csharp: 51,        // C#
 };
 
 /**

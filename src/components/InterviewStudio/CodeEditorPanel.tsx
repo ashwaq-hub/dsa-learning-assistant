@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 
 interface Problem {
   title: string;
@@ -23,14 +23,50 @@ interface CodeEditorPanelProps {
   setIsRunning: (running: boolean) => void;
 }
 
-const LANGUAGE_MAP: Record<string, string> = {
-  'javascript': '63',  // Node.js
-  'python': '71',      // Python 3
-  'java': '91',        // Java (OpenJDK 13.0.1)
-  'cpp': '54',         // C++ (GCC 9.2.0)
-  'c': '50',           // C (GCC 9.2.0)
-  'go': '60',          // Go (1.13.5)
-  'csharp': '51',      // C# (Mono 6.4.0)
+const codeTemplates: Record<string, string> = {
+  javascript: `// Write your solution here
+function solve() {
+  console.log("Hello");
+}
+
+solve();`,
+  python: `# Write your solution here
+def solve():
+    print("Hello")
+
+solve()`,
+  java: `public class Solution {
+  public static void main(String[] args) {
+    System.out.println("Hello");
+  }
+}`,
+  cpp: `#include <iostream>
+using namespace std;
+
+int main() {
+    cout << "Hello" << endl;
+    return 0;
+}`,
+  c: `#include <stdio.h>
+
+int main() {
+    printf("Hello\\n");
+    return 0;
+}`,
+  go: `package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Hello")
+}`,
+  csharp: `using System;
+
+class Program {
+    static void Main() {
+        Console.WriteLine("Hello");
+    }
+}`,
 };
 
 export default function CodeEditorPanel({
@@ -43,72 +79,64 @@ export default function CodeEditorPanel({
   setIsRunning,
 }: CodeEditorPanelProps) {
   const [language, setLanguage] = useState('javascript');
-  const [testResults, setTestResults] = useState<Array<{ passed: boolean; message: string }>>([]);
+  const [error, setError] = useState('');
 
-  const handleRunCode = async () => {
+  const handleRunCode = useCallback(async () => {
+    if (!code.trim()) {
+      setError('Please enter some code first');
+      setOutput('');
+      return;
+    }
+
     setIsRunning(true);
+    setError('');
+    setOutput('Executing...');
+
     try {
       const response = await fetch('/api/execute', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          code,
-          language: LANGUAGE_MAP[language] || '63',
+          language: language,
+          code: code.trim(),
         }),
       });
 
       const data = await response.json();
-      setOutput(data.stdout || data.stderr || 'No output');
-    } catch (error) {
-      setOutput(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    } finally {
-      setIsRunning(false);
-    }
-  };
 
-  const handleRunTestCases = async () => {
-    setIsRunning(true);
-    setTestResults([]);
-    try {
-      const results = [];
-      for (const example of problem.examples) {
-        const testCode = code.includes('function')
-          ? code + `\nconsole.log(${example.input});`
-          : code + `\nprint(${example.input})`;
-
-        const response = await fetch('/api/execute', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            code: testCode,
-            language: LANGUAGE_MAP[language] || '63',
-          }),
-        });
-
-        const data = await response.json();
-        const result = data.stdout?.trim() || '';
-        const expected = example.output;
-        const passed = result === expected;
-
-        results.push({
-          passed,
-          message: `Test: ${example.input} → Expected: ${expected}, Got: ${result}`,
-        });
+      if (!response.ok) {
+        setError(data.error || 'Execution failed');
+        setOutput('');
+        return;
       }
-      setTestResults(results);
-      const passedCount = results.filter(r => r.passed).length;
-      setOutput(`Test Results: ${passedCount}/${results.length} passed`);
-    } catch (error) {
-      setOutput(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+
+      if (data.error) {
+        setError(data.error);
+        setOutput('');
+      } else {
+        setOutput(data.output || '(No output)');
+        setError('');
+      }
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error';
+      setError(`Error: ${errorMsg}`);
+      setOutput('');
     } finally {
       setIsRunning(false);
     }
+  }, [code, language, setIsRunning, setOutput]);
+
+  const handleLanguageChange = (newLanguage: string) => {
+    setLanguage(newLanguage);
+    setCode(codeTemplates[newLanguage] || '');
+    setOutput('');
+    setError('');
   };
 
   const handleReset = () => {
-    setCode('');
+    setCode(codeTemplates[language] || '');
     setOutput('');
-    setTestResults([]);
+    setError('');
   };
 
   return (
@@ -116,7 +144,7 @@ export default function CodeEditorPanel({
       <div className="editor-header">
         <div className="language-selector">
           <label>Language:</label>
-          <select value={language} onChange={(e) => setLanguage(e.target.value)}>
+          <select value={language} onChange={(e) => handleLanguageChange(e.target.value)}>
             <option value="javascript">JavaScript</option>
             <option value="python">Python</option>
             <option value="java">Java</option>
@@ -135,13 +163,6 @@ export default function CodeEditorPanel({
           >
             {isRunning ? '⏳ Running...' : '▶️ Run Code'}
           </button>
-          <button
-            className="btn btn-test"
-            onClick={handleRunTestCases}
-            disabled={isRunning}
-          >
-            {isRunning ? '⏳ Testing...' : '✅ Run Tests'}
-          </button>
           <button className="btn btn-reset" onClick={handleReset}>
             🔄 Reset
           </button>
@@ -159,33 +180,11 @@ export default function CodeEditorPanel({
       <div className="output-section">
         <div className="output-header">
           <h3>Output</h3>
-          {testResults.length > 0 && (
-            <span className="test-summary">
-              {testResults.filter(r => r.passed).length}/{testResults.length} passed
-            </span>
-          )}
         </div>
-        <pre className="output-content">
-          {output || 'Run your code to see output...'}
-        </pre>
-
-        {testResults.length > 0 && (
-          <div className="test-results">
-            <h4>Test Case Results:</h4>
-            <div className="results-list">
-              {testResults.map((result, idx) => (
-                <div
-                  key={idx}
-                  className={`test-result ${result.passed ? 'passed' : 'failed'}`}
-                >
-                  <span className="test-icon">
-                    {result.passed ? '✅' : '❌'}
-                  </span>
-                  <span className="test-message">{result.message}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+        {error ? (
+          <pre className="output-content error">{error}</pre>
+        ) : (
+          <pre className="output-content">{output || 'Run your code to see output...'}</pre>
         )}
       </div>
 
@@ -229,6 +228,11 @@ export default function CodeEditorPanel({
           cursor: pointer;
         }
 
+        .language-selector select:focus {
+          outline: none;
+          border-color: var(--accent-blue);
+        }
+
         .editor-actions {
           display: flex;
           gap: 0.5rem;
@@ -253,16 +257,6 @@ export default function CodeEditorPanel({
 
         .btn-run:hover:not(:disabled) {
           background: #22c55e;
-          transform: scale(1.02);
-        }
-
-        .btn-test {
-          background: var(--accent-blue);
-          color: white;
-        }
-
-        .btn-test:hover:not(:disabled) {
-          background: #2563eb;
           transform: scale(1.02);
         }
 
@@ -308,7 +302,7 @@ export default function CodeEditorPanel({
         .output-section {
           display: flex;
           flex-direction: column;
-          max-height: 250px;
+          max-height: 200px;
           border: 1px solid var(--border-color);
           border-radius: 0.5rem;
           overflow: hidden;
@@ -329,15 +323,6 @@ export default function CodeEditorPanel({
           color: var(--text-primary);
         }
 
-        .test-summary {
-          font-size: 0.75rem;
-          padding: 0.25rem 0.75rem;
-          background: rgba(34, 197, 94, 0.2);
-          color: var(--accent-green);
-          border-radius: 9999px;
-          font-weight: 600;
-        }
-
         .output-content {
           flex: 1;
           margin: 0;
@@ -352,55 +337,9 @@ export default function CodeEditorPanel({
           line-height: 1.5;
         }
 
-        .test-results {
-          background: var(--bg-primary);
-          border-top: 1px solid var(--border-color);
-          padding: 0.75rem 1rem;
-          max-height: 150px;
-          overflow-y: auto;
-        }
-
-        .test-results h4 {
-          margin: 0 0 0.75rem 0;
-          font-size: 0.85rem;
-          color: var(--text-secondary);
-        }
-
-        .results-list {
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-        }
-
-        .test-result {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          padding: 0.5rem;
-          border-radius: 0.375rem;
-          font-size: 0.8rem;
-        }
-
-        .test-result.passed {
-          background: rgba(34, 197, 94, 0.1);
-          color: var(--accent-green);
-        }
-
-        .test-result.failed {
-          background: rgba(239, 68, 68, 0.1);
+        .output-content.error {
           color: var(--accent-red);
-        }
-
-        .test-icon {
-          flex-shrink: 0;
-          font-size: 0.9rem;
-        }
-
-        .test-message {
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          line-height: 1.2;
+          background: rgba(255, 107, 107, 0.05);
         }
 
         @media (max-width: 768px) {
@@ -423,7 +362,7 @@ export default function CodeEditorPanel({
           }
 
           .output-section {
-            max-height: 200px;
+            max-height: 150px;
           }
 
           .code-textarea {
