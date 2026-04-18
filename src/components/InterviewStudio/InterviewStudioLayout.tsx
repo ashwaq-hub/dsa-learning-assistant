@@ -6,6 +6,20 @@ import CodeEditorPanel from './CodeEditorPanel';
 import InterviewTimer from './InterviewTimer';
 import { problems as defaultProblems } from '@/data/interviewProblems';
 
+interface Problem {
+  title: string;
+  description: string;
+  shortDescription: string;
+  examples: Array<{ input: string; output: string; explanation?: string }>;
+  constraints: string[];
+  timeComplexity?: string;
+  spaceComplexity?: string;
+  topics: string[];
+  difficulty: 'easy' | 'medium' | 'hard';
+  estimatedTime: number;
+  starterCode?: string;
+}
+
 export default function InterviewStudioLayout() {
   const [problems, setProblems] = useState(defaultProblems);
   const [currentProblemIdx, setCurrentProblemIdx] = useState(0);
@@ -14,6 +28,21 @@ export default function InterviewStudioLayout() {
   const [code, setCode] = useState('');
   const [output, setOutput] = useState('');
   const [isRunning, setIsRunning] = useState(false);
+  const [filterDifficulty, setFilterDifficulty] = useState<'all' | 'easy' | 'medium' | 'hard'>('all');
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newProblem, setNewProblem] = useState<Partial<Problem>>({
+    title: '',
+    shortDescription: '',
+    description: '',
+    difficulty: 'medium',
+    estimatedTime: 45,
+    topics: [],
+    examples: [{ input: '', output: '', explanation: '' }],
+    constraints: [],
+    timeComplexity: '',
+    spaceComplexity: '',
+    starterCode: '',
+  });
 
   // Load custom problems from localStorage
   useEffect(() => {
@@ -30,6 +59,11 @@ export default function InterviewStudioLayout() {
   }, []);
 
   const currentProblem = problems[currentProblemIdx] || problems[0];
+
+  // Filter problems by difficulty
+  const filteredProblems = filterDifficulty === 'all'
+    ? problems
+    : problems.filter(p => p.difficulty === filterDifficulty);
 
   const handleStartInterview = (difficulty: 'easy' | 'medium' | 'hard') => {
     const timeMap = { easy: 20 * 60, medium: 45 * 60, hard: 60 * 60 };
@@ -57,6 +91,42 @@ export default function InterviewStudioLayout() {
       setCode('');
       setOutput('');
     }
+  };
+
+  const handleAddProblem = () => {
+    if (!newProblem.title || !newProblem.shortDescription) {
+      alert('Please fill in at least title and description');
+      return;
+    }
+
+    const problemToAdd = newProblem as Problem;
+    const updatedProblems = [...problems, problemToAdd];
+    setProblems(updatedProblems);
+
+    // Save to localStorage
+    try {
+      const customProblems = localStorage.getItem('interviewProblems') || '[]';
+      const parsed = JSON.parse(customProblems);
+      localStorage.setItem('interviewProblems', JSON.stringify([...parsed, problemToAdd]));
+    } catch (error) {
+      console.error('Failed to save problem:', error);
+    }
+
+    // Reset form
+    setNewProblem({
+      title: '',
+      shortDescription: '',
+      description: '',
+      difficulty: 'medium',
+      estimatedTime: 45,
+      topics: [],
+      examples: [{ input: '', output: '', explanation: '' }],
+      constraints: [],
+      timeComplexity: '',
+      spaceComplexity: '',
+      starterCode: '',
+    });
+    setShowAddModal(false);
   };
 
   return (
@@ -112,33 +182,81 @@ export default function InterviewStudioLayout() {
             </div>
 
             <div className="problem-selector">
-              <h2>Select a Problem</h2>
-              <div className="problems-grid">
-                {problems.map((problem, idx) => (
-                  <div
-                    key={idx}
-                    className={`problem-card ${idx === currentProblemIdx ? 'active' : ''}`}
-                    onClick={() => setCurrentProblemIdx(idx)}
-                  >
-                    <div className="problem-header">
-                      <h3>{problem.title}</h3>
-                      <span className={`difficulty difficulty-${problem.difficulty}`}>
-                        {problem.difficulty}
-                      </span>
-                    </div>
-                    <p className="problem-description">{problem.shortDescription}</p>
-                    <div className="problem-meta">
-                      <span className="meta-item">⏱ {problem.estimatedTime}min</span>
-                      <span className="meta-item">📊 {problem.topics.join(', ')}</span>
-                    </div>
-                  </div>
-                ))}
+              <div className="selector-header">
+                <h2>Select a Problem</h2>
+                <button
+                  className="btn-add-problem"
+                  onClick={() => setShowAddModal(true)}
+                  title="Add new problem"
+                >
+                  <span className="plus-icon">+</span>
+                </button>
+              </div>
+
+              {/* Difficulty Filter */}
+              <div className="difficulty-filter">
+                <button
+                  className={`filter-btn ${filterDifficulty === 'all' ? 'active' : ''}`}
+                  onClick={() => setFilterDifficulty('all')}
+                >
+                  All
+                </button>
+                <button
+                  className={`filter-btn filter-easy ${filterDifficulty === 'easy' ? 'active' : ''}`}
+                  onClick={() => setFilterDifficulty('easy')}
+                >
+                  Easy
+                </button>
+                <button
+                  className={`filter-btn filter-medium ${filterDifficulty === 'medium' ? 'active' : ''}`}
+                  onClick={() => setFilterDifficulty('medium')}
+                >
+                  Medium
+                </button>
+                <button
+                  className={`filter-btn filter-hard ${filterDifficulty === 'hard' ? 'active' : ''}`}
+                  onClick={() => setFilterDifficulty('hard')}
+                >
+                  Hard
+                </button>
+              </div>
+
+              {/* Compact Problem List */}
+              <div className="problems-list">
+                {filteredProblems.length > 0 ? (
+                  filteredProblems.map((problem, idx) => {
+                    const actualIdx = problems.findIndex(p => p.title === problem.title);
+                    return (
+                      <div
+                        key={idx}
+                        className={`problem-item ${actualIdx === currentProblemIdx ? 'active' : ''}`}
+                        onClick={() => setCurrentProblemIdx(actualIdx)}
+                      >
+                        <div className="item-left">
+                          <h4>{problem.title}</h4>
+                          <p className="item-subtitle">
+                            {problem.shortDescription.substring(0, 80)}...
+                          </p>
+                        </div>
+                        <div className="item-right">
+                          <span className={`difficulty difficulty-${problem.difficulty}`}>
+                            {problem.difficulty}
+                          </span>
+                          <span className="item-time">⏱ {problem.estimatedTime}min</span>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <p className="no-problems">No problems found</p>
+                )}
               </div>
             </div>
 
-            <div className="difficulty-selector">
+            {/* Start Interview Section */}
+            <div className="start-section">
               <h2>Start Interview</h2>
-              <p>Choose your difficulty level:</p>
+              <p>Select difficulty and time limit:</p>
               <div className="difficulty-buttons">
                 <button
                   className="btn btn-difficulty-easy"
@@ -164,17 +282,114 @@ export default function InterviewStudioLayout() {
               </div>
             </div>
 
-            <div className="tips-section">
-              <h3>💡 Interview Tips</h3>
-              <ul className="tips-list">
-                <li>Start by understanding the problem - ask clarifying questions mentally</li>
-                <li>Discuss your approach before coding</li>
-                <li>Write clean, readable code</li>
-                <li>Test your code with edge cases</li>
-                <li>Explain time and space complexity</li>
-                <li>Optimize if you have time remaining</li>
-              </ul>
-            </div>
+            {/* Add Problem Modal */}
+            {showAddModal && (
+              <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
+                <div className="modal-content" onClick={e => e.stopPropagation()}>
+                  <div className="modal-header">
+                    <h3>Add New Problem</h3>
+                    <button
+                      className="modal-close"
+                      onClick={() => setShowAddModal(false)}
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <div className="modal-body">
+                    <div className="form-group">
+                      <label>Problem Title *</label>
+                      <input
+                        type="text"
+                        value={newProblem.title || ''}
+                        onChange={(e) => setNewProblem({ ...newProblem, title: e.target.value })}
+                        placeholder="e.g., Two Sum"
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>Short Description *</label>
+                      <input
+                        type="text"
+                        value={newProblem.shortDescription || ''}
+                        onChange={(e) => setNewProblem({ ...newProblem, shortDescription: e.target.value })}
+                        placeholder="Brief one-line description"
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>Full Description</label>
+                      <textarea
+                        value={newProblem.description || ''}
+                        onChange={(e) => setNewProblem({ ...newProblem, description: e.target.value })}
+                        placeholder="Detailed problem description"
+                        rows={4}
+                      />
+                    </div>
+
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label>Difficulty</label>
+                        <select
+                          value={newProblem.difficulty || 'medium'}
+                          onChange={(e) => setNewProblem({ ...newProblem, difficulty: e.target.value as 'easy' | 'medium' | 'hard' })}
+                        >
+                          <option value="easy">Easy</option>
+                          <option value="medium">Medium</option>
+                          <option value="hard">Hard</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label>Estimated Time (min)</label>
+                        <input
+                          type="number"
+                          value={newProblem.estimatedTime || 45}
+                          onChange={(e) => setNewProblem({ ...newProblem, estimatedTime: parseInt(e.target.value) })}
+                          min="5"
+                          max="120"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label>Topics (comma-separated)</label>
+                      <input
+                        type="text"
+                        value={(newProblem.topics || []).join(', ')}
+                        onChange={(e) => setNewProblem({ ...newProblem, topics: e.target.value.split(',').map(t => t.trim()) })}
+                        placeholder="Array, Sorting, String"
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>Starter Code</label>
+                      <textarea
+                        value={newProblem.starterCode || ''}
+                        onChange={(e) => setNewProblem({ ...newProblem, starterCode: e.target.value })}
+                        placeholder="Optional starter code template"
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="modal-footer">
+                    <button
+                      className="btn-cancel"
+                      onClick={() => setShowAddModal(false)}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      className="btn-create"
+                      onClick={handleAddProblem}
+                    >
+                      Create Problem
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -277,62 +492,173 @@ export default function InterviewStudioLayout() {
         }
 
         .problem-selector {
-          margin-bottom: 4rem;
+          margin-bottom: 3rem;
+          background: var(--bg-card);
+          border: 1px solid var(--border-color);
+          border-radius: 1rem;
+          padding: 2rem;
         }
 
-        .problem-selector h2 {
-          font-size: 1.5rem;
-          font-weight: 700;
+        .selector-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
           margin-bottom: 1.5rem;
         }
 
-        .problems-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-          gap: 1.5rem;
-          margin-bottom: 2rem;
+        .problem-selector h2 {
+          font-size: 1.25rem;
+          font-weight: 700;
+          margin: 0;
         }
 
-        .problem-card {
-          background: var(--bg-card);
-          border: 2px solid var(--border-color);
-          border-radius: 1rem;
-          padding: 1.5rem;
+        .btn-add-problem {
+          background: var(--accent-blue);
+          color: white;
+          border: none;
+          border-radius: 0.5rem;
+          padding: 0.5rem 1rem;
           cursor: pointer;
-          transition: all 0.3s;
+          font-size: 1.25rem;
+          font-weight: 600;
+          transition: all 0.2s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 44px;
+          min-height: 44px;
         }
 
-        .problem-card:hover {
+        .btn-add-problem:hover {
+          background: #1e90ff;
+          transform: scale(1.05);
+        }
+
+        .plus-icon {
+          font-size: 1.5rem;
+          line-height: 1;
+        }
+
+        /* Difficulty Filter */
+        .difficulty-filter {
+          display: flex;
+          gap: 0.75rem;
+          margin-bottom: 1.5rem;
+          flex-wrap: wrap;
+        }
+
+        .filter-btn {
+          padding: 0.5rem 1rem;
+          border: 2px solid var(--border-color);
+          background: transparent;
+          border-radius: 0.5rem;
+          cursor: pointer;
+          font-weight: 500;
+          color: var(--text-secondary);
+          transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
           border-color: var(--accent-blue);
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(30, 144, 255, 0.2);
+          color: var(--accent-blue);
         }
 
-        .problem-card.active {
+        .filter-btn.active {
           border-color: var(--accent-blue);
-          background: rgba(30, 144, 255, 0.1);
+          background: var(--accent-blue);
+          color: white;
         }
 
-        .problem-header {
+        .filter-btn.filter-easy.active {
+          border-color: var(--accent-green);
+          background: var(--accent-green);
+        }
+
+        .filter-btn.filter-medium.active {
+          border-color: var(--accent-yellow);
+          background: var(--accent-yellow);
+          color: #000;
+        }
+
+        .filter-btn.filter-hard.active {
+          border-color: var(--accent-red);
+          background: var(--accent-red);
+        }
+
+        /* Compact Problems List */
+        .problems-list {
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+          max-height: 400px;
+          overflow-y: auto;
+        }
+
+        .problem-item {
           display: flex;
           justify-content: space-between;
-          align-items: start;
-          gap: 1rem;
-          margin-bottom: 1rem;
+          align-items: center;
+          padding: 1rem;
+          background: var(--bg-primary);
+          border: 1px solid var(--border-color);
+          border-radius: 0.5rem;
+          cursor: pointer;
+          transition: all 0.2s;
         }
 
-        .problem-header h3 {
-          margin: 0;
-          font-size: 1.125rem;
+        .problem-item:hover {
+          border-color: var(--accent-blue);
+          background: rgba(30, 144, 255, 0.05);
+        }
+
+        .problem-item.active {
+          border-color: var(--accent-blue);
+          background: rgba(30, 144, 255, 0.1);
+          box-shadow: 0 2px 8px rgba(30, 144, 255, 0.15);
+        }
+
+        .item-left {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .item-left h4 {
+          margin: 0 0 0.25rem 0;
+          font-size: 0.95rem;
           color: var(--text-primary);
+          font-weight: 600;
+        }
+
+        .item-subtitle {
+          margin: 0;
+          font-size: 0.75rem;
+          color: var(--text-tertiary);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .item-right {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          flex-shrink: 0;
+          margin-left: 1rem;
+        }
+
+        .item-time {
+          font-size: 0.75rem;
+          color: var(--text-secondary);
+          white-space: nowrap;
         }
 
         .difficulty {
-          padding: 0.25rem 0.75rem;
+          padding: 0.25rem 0.5rem;
           border-radius: 9999px;
-          font-size: 0.75rem;
+          font-size: 0.65rem;
           font-weight: 600;
           white-space: nowrap;
+          text-transform: uppercase;
         }
 
         .difficulty-easy {
@@ -350,38 +676,26 @@ export default function InterviewStudioLayout() {
           color: var(--accent-red);
         }
 
-        .problem-description {
-          color: var(--text-secondary);
-          font-size: 0.875rem;
-          margin: 0 0 1rem 0;
-          line-height: 1.5;
-        }
-
-        .problem-meta {
-          display: flex;
-          gap: 1rem;
-          font-size: 0.75rem;
-          color: var(--text-tertiary);
-        }
-
-        .meta-item {
-          display: flex;
-          align-items: center;
-          gap: 0.25rem;
-        }
-
-        .difficulty-selector {
+        .no-problems {
           text-align: center;
-          margin-bottom: 4rem;
+          color: var(--text-tertiary);
+          padding: 2rem 1rem;
+          font-size: 0.9rem;
         }
 
-        .difficulty-selector h2 {
+        /* Start Interview Section */
+        .start-section {
+          text-align: center;
+          margin-bottom: 3rem;
+        }
+
+        .start-section h2 {
           font-size: 1.5rem;
           font-weight: 700;
           margin-bottom: 0.5rem;
         }
 
-        .difficulty-selector > p {
+        .start-section > p {
           color: var(--text-secondary);
           margin-bottom: 1.5rem;
         }
@@ -449,38 +763,153 @@ export default function InterviewStudioLayout() {
           font-weight: 500;
         }
 
-        .tips-section {
+        /* Modal Styles */
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+          padding: 1rem;
+        }
+
+        .modal-content {
           background: var(--bg-card);
           border: 1px solid var(--border-color);
           border-radius: 1rem;
-          padding: 2rem;
           max-width: 600px;
-          margin: 0 auto;
+          width: 100%;
+          max-height: 85vh;
+          overflow-y: auto;
+          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
         }
 
-        .tips-section h3 {
-          font-size: 1.25rem;
-          font-weight: 700;
-          margin-bottom: 1rem;
-          color: var(--accent-yellow);
-        }
-
-        .tips-list {
-          list-style: none;
-          padding: 0;
-          margin: 0;
-        }
-
-        .tips-list li {
-          padding: 0.75rem 0;
-          color: var(--text-secondary);
+        .modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1.5rem;
           border-bottom: 1px solid var(--border-color);
-          font-size: 0.9rem;
-          line-height: 1.5;
         }
 
-        .tips-list li:last-child {
-          border-bottom: none;
+        .modal-header h3 {
+          margin: 0;
+          font-size: 1.25rem;
+          color: var(--text-primary);
+        }
+
+        .modal-close {
+          background: none;
+          border: none;
+          font-size: 1.5rem;
+          cursor: pointer;
+          color: var(--text-secondary);
+          padding: 0;
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+          color: var(--text-primary);
+          background: var(--bg-primary);
+          border-radius: 0.25rem;
+        }
+
+        .modal-body {
+          padding: 1.5rem;
+        }
+
+        .modal-footer {
+          display: flex;
+          gap: 1rem;
+          padding: 1.5rem;
+          border-top: 1px solid var(--border-color);
+          justify-content: flex-end;
+        }
+
+        .form-group {
+          margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+          display: block;
+          font-weight: 600;
+          margin-bottom: 0.5rem;
+          color: var(--text-primary);
+          font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+          width: 100%;
+          padding: 0.75rem;
+          border: 1px solid var(--border-color);
+          border-radius: 0.5rem;
+          background: var(--bg-primary);
+          color: var(--text-primary);
+          font-family: inherit;
+          font-size: 0.9rem;
+          transition: all 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+          outline: none;
+          border-color: var(--accent-blue);
+          box-shadow: 0 0 0 3px rgba(30, 144, 255, 0.1);
+        }
+
+        .form-group textarea {
+          resize: vertical;
+          font-family: 'Courier New', monospace;
+        }
+
+        .form-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1rem;
+        }
+
+        .btn-cancel,
+        .btn-create {
+          padding: 0.75rem 1.5rem;
+          border: none;
+          border-radius: 0.5rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+          font-size: 0.9rem;
+        }
+
+        .btn-cancel {
+          background: var(--bg-primary);
+          color: var(--text-primary);
+          border: 1px solid var(--border-color);
+        }
+
+        .btn-cancel:hover {
+          background: var(--border-color);
+        }
+
+        .btn-create {
+          background: var(--accent-blue);
+          color: white;
+        }
+
+        .btn-create:hover {
+          background: #1e90ff;
+          transform: scale(1.02);
         }
 
         @media (max-width: 1024px) {
@@ -520,8 +949,25 @@ export default function InterviewStudioLayout() {
             font-size: 2rem;
           }
 
-          .problems-grid {
-            grid-template-columns: 1fr;
+          .problem-selector {
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+          }
+
+          .selector-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
+          }
+
+          .difficulty-filter {
+            width: 100%;
+          }
+
+          .item-right {
+            flex-direction: column;
+            gap: 0.25rem;
+            align-items: flex-end;
           }
 
           .difficulty-buttons {
@@ -529,8 +975,20 @@ export default function InterviewStudioLayout() {
             align-items: stretch;
           }
 
+          .form-row {
+            grid-template-columns: 1fr;
+          }
+
           .studio-pane {
             padding: 1rem;
+          }
+
+          .modal-overlay {
+            padding: 0.5rem;
+          }
+
+          .modal-content {
+            max-height: 90vh;
           }
         }
       `}</style>
