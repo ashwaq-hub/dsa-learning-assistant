@@ -28,6 +28,8 @@ All markdown and documentation files are organized in this folder.
 - **[QUESTION_MANAGEMENT_GUIDE.md](./QUESTION_MANAGEMENT_GUIDE.md)** - Managing interview questions
 - **[QUESTION_MANAGEMENT_QUICK_REFERENCE.txt](./QUESTION_MANAGEMENT_QUICK_REFERENCE.txt)** - Quick reference
 - **[COMPANY_INTERVIEW_SETUP.md](./COMPANY_INTERVIEW_SETUP.md)** - Company-wise interview setup
+- **[TEST_CASES_GUIDE.md](./TEST_CASES_GUIDE.md)** - Creating and managing test cases
+- **[JAVA_TEST_TEMPLATE.md](./JAVA_TEST_TEMPLATE.md)** - Java template with test examples
 
 ## 🆕 Recent Updates
 

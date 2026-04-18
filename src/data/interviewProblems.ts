@@ -10,6 +10,10 @@ export interface InterviewProblem {
   difficulty: 'easy' | 'medium' | 'hard';
   estimatedTime: number;
   starterCode?: string;
+  // Test cases with standardized input/output format
+  testCases?: Array<{ input: string; output: string; description: string }>;
+  // Expected output format for test validation
+  outputFormat?: 'array' | 'number' | 'string' | 'boolean' | 'matrix';
 }
 
 export const problems: InterviewProblem[] = [
@@ -48,6 +52,35 @@ You can return the answer in any order.`,
   // Write your solution here
   return [];
 }`,
+    // Standardized test cases with consistent format
+    testCases: [
+      {
+        input: '2,7,11,15|9',
+        output: '0,1',
+        description: 'Basic case: nums = [2,7,11,15], target = 9'
+      },
+      {
+        input: '3,2,4|6',
+        output: '1,2',
+        description: 'Example 2: nums = [3,2,4], target = 6'
+      },
+      {
+        input: '3,3|6',
+        output: '0,1',
+        description: 'Duplicate values: nums = [3,3], target = 6'
+      },
+      {
+        input: '1,2,3,4,5,6|11',
+        output: '4,5',
+        description: 'Larger array: nums = [1,2,3,4,5,6], target = 11'
+      },
+      {
+        input: '-1,0,1,2,-1,-4|0',
+        output: '1,2',
+        description: 'Negative numbers: nums = [-1,0,1,2,-1,-4], target = 0'
+      }
+    ],
+    outputFormat: 'array'
   },
   {
     title: 'Reverse String',
