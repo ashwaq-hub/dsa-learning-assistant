@@ -1,3 +1,10 @@
+export interface TestCase {
+  name: string;
+  runnerCode: Partial<Record<string, string>>;
+  expected: string;
+  compareMode?: 'exact' | 'sorted-array';
+}
+
 export interface InterviewProblem {
   title: string;
   shortDescription: string;
@@ -10,6 +17,7 @@ export interface InterviewProblem {
   difficulty: 'easy' | 'medium' | 'hard';
   estimatedTime: number;
   starterCode?: string;
+  testCases?: TestCase[];
 }
 
 export const problems: InterviewProblem[] = [
@@ -48,6 +56,53 @@ You can return the answer in any order.`,
   // Write your solution here
   return [];
 }`,
+    testCases: [
+      {
+        name: 'Basic case',
+        runnerCode: {
+          javascript: 'console.log(JSON.stringify(twoSum([2,7,11,15], 9)));',
+          python: 'import json\nprint(json.dumps(twoSum([2,7,11,15], 9)))',
+        },
+        expected: '[0,1]',
+        compareMode: 'sorted-array',
+      },
+      {
+        name: 'Duplicate values',
+        runnerCode: {
+          javascript: 'console.log(JSON.stringify(twoSum([3,2,4], 6)));',
+          python: 'import json\nprint(json.dumps(twoSum([3,2,4], 6)))',
+        },
+        expected: '[1,2]',
+        compareMode: 'sorted-array',
+      },
+      {
+        name: 'Same element used twice',
+        runnerCode: {
+          javascript: 'console.log(JSON.stringify(twoSum([3,3], 6)));',
+          python: 'import json\nprint(json.dumps(twoSum([3,3], 6)))',
+        },
+        expected: '[0,1]',
+        compareMode: 'sorted-array',
+      },
+      {
+        name: 'Negative numbers',
+        runnerCode: {
+          javascript: 'console.log(JSON.stringify(twoSum([-1,-2,-3,-4,-5], -8)));',
+          python: 'import json\nprint(json.dumps(twoSum([-1,-2,-3,-4,-5], -8)))',
+        },
+        expected: '[2,4]',
+        compareMode: 'sorted-array',
+      },
+      {
+        name: 'Minimal array',
+        runnerCode: {
+          javascript: 'console.log(JSON.stringify(twoSum([1,2], 3)));',
+          python: 'import json\nprint(json.dumps(twoSum([1,2], 3)))',
+        },
+        expected: '[0,1]',
+        compareMode: 'sorted-array',
+      },
+    ],
   },
   {
     title: 'Reverse String',
@@ -77,6 +132,40 @@ You must do this by modifying the input array in-place with O(1) extra memory.`,
     starterCode: `function reverseString(s) {
   // Write your solution here
 }`,
+    testCases: [
+      {
+        name: 'Odd length string',
+        runnerCode: {
+          javascript: 'const s1=["h","e","l","l","o"]; reverseString(s1); console.log(JSON.stringify(s1));',
+          python: 'import json\ns1=["h","e","l","l","o"]; reverseString(s1); print(json.dumps(s1))',
+        },
+        expected: '["o","l","l","e","h"]',
+      },
+      {
+        name: 'Even length string',
+        runnerCode: {
+          javascript: 'const s2=["H","a","n","n","a","h"]; reverseString(s2); console.log(JSON.stringify(s2));',
+          python: 'import json\ns2=["H","a","n","n","a","h"]; reverseString(s2); print(json.dumps(s2))',
+        },
+        expected: '["h","a","n","n","a","H"]',
+      },
+      {
+        name: 'Single character',
+        runnerCode: {
+          javascript: 'const s3=["a"]; reverseString(s3); console.log(JSON.stringify(s3));',
+          python: 'import json\ns3=["a"]; reverseString(s3); print(json.dumps(s3))',
+        },
+        expected: '["a"]',
+      },
+      {
+        name: 'Two characters',
+        runnerCode: {
+          javascript: 'const s4=["a","b"]; reverseString(s4); console.log(JSON.stringify(s4));',
+          python: 'import json\ns4=["a","b"]; reverseString(s4); print(json.dumps(s4))',
+        },
+        expected: '["b","a"]',
+      },
+    ],
   },
   {
     title: 'Valid Parentheses',
@@ -114,6 +203,56 @@ An input string is valid if:
   // Write your solution here
   return false;
 }`,
+    testCases: [
+      {
+        name: 'Simple match',
+        runnerCode: {
+          javascript: 'console.log(String(isValid("()")));',
+          python: 'print(str(isValid("()")).lower())',
+        },
+        expected: 'true',
+      },
+      {
+        name: 'All bracket types',
+        runnerCode: {
+          javascript: 'console.log(String(isValid("()[]{}")));',
+          python: 'print(str(isValid("()[]{}")).lower())',
+        },
+        expected: 'true',
+      },
+      {
+        name: 'Nested brackets',
+        runnerCode: {
+          javascript: 'console.log(String(isValid("{[]}")));',
+          python: 'print(str(isValid("{[]}")).lower())',
+        },
+        expected: 'true',
+      },
+      {
+        name: 'Wrong order',
+        runnerCode: {
+          javascript: 'console.log(String(isValid("([)]")));',
+          python: 'print(str(isValid("([)]")).lower())',
+        },
+        expected: 'false',
+      },
+      {
+        name: 'Unclosed bracket',
+        runnerCode: {
+          javascript: 'console.log(String(isValid("(")));',
+          python: 'print(str(isValid("(")).lower())',
+        },
+        expected: 'false',
+      },
+      {
+        name: 'Extra closing bracket',
+        runnerCode: {
+          javascript: 'console.log(String(isValid(")")));',
+          python: 'print(str(isValid(")")).lower())',
+        },
+        expected: 'false',
+      },
+    ],
   },
   {
     title: 'Longest Substring Without Repeating Characters',
@@ -149,6 +288,48 @@ An input string is valid if:
   // Write your solution here
   return 0;
 }`,
+    testCases: [
+      {
+        name: 'Repeating chars',
+        runnerCode: {
+          javascript: 'console.log(lengthOfLongestSubstring("abcabcbb"));',
+          python: 'print(lengthOfLongestSubstring("abcabcbb"))',
+        },
+        expected: '3',
+      },
+      {
+        name: 'All same char',
+        runnerCode: {
+          javascript: 'console.log(lengthOfLongestSubstring("bbbbb"));',
+          python: 'print(lengthOfLongestSubstring("bbbbb"))',
+        },
+        expected: '1',
+      },
+      {
+        name: 'Unique in middle',
+        runnerCode: {
+          javascript: 'console.log(lengthOfLongestSubstring("pwwkew"));',
+          python: 'print(lengthOfLongestSubstring("pwwkew"))',
+        },
+        expected: '3',
+      },
+      {
+        name: 'Empty string',
+        runnerCode: {
+          javascript: 'console.log(lengthOfLongestSubstring(""));',
+          python: 'print(lengthOfLongestSubstring(""))',
+        },
+        expected: '0',
+      },
+      {
+        name: 'All unique chars',
+        runnerCode: {
+          javascript: 'console.log(lengthOfLongestSubstring("abcde"));',
+          python: 'print(lengthOfLongestSubstring("abcde"))',
+        },
+        expected: '5',
+      },
+    ],
   },
   {
     title: 'Binary Tree Level Order Traversal',

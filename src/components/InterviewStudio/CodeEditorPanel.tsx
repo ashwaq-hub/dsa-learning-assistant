@@ -2,6 +2,13 @@
 
 import { useState, useCallback } from 'react';
 
+interface TestCase {
+  name: string;
+  runnerCode: Partial<Record<string, string>>;
+  expected: string;
+  compareMode?: 'exact' | 'sorted-array';
+}
+
 interface Problem {
   title: string;
   description: string;
@@ -11,6 +18,7 @@ interface Problem {
   spaceComplexity?: string;
   topics: string[];
   difficulty: 'easy' | 'medium' | 'hard';
+  testCases?: TestCase[];
 }
 
 interface CodeEditorPanelProps {
@@ -134,7 +142,29 @@ export default function CodeEditorPanel({
     setError('');
   };
 
+  const normalizeOutput = (s: string, compareMode?: 'exact' | 'sorted-array'): string => {
+    const trimmed = s.trim().replace(/\s+/g, '');
+    if (compareMode === 'sorted-array') {
+      try {
+        const arr = JSON.parse(trimmed);
+        if (Array.isArray(arr)) {
+          return JSON.stringify([...arr].sort((a: number, b: number) => a - b));
+        }
+      } catch {
+        // fall through to default
+      }
+    }
+    return trimmed.toLowerCase();
+  };
+
   const handleRunTestCases = useCallback(async () => {
+    const testCases = problem.testCases;
+
+    if (!testCases || testCases.length === 0) {
+      setError('No test cases defined for this problem.');
+      return;
+    }
+
     setIsRunning(true);
     setTestResults([]);
     setError('');
@@ -142,41 +172,51 @@ export default function CodeEditorPanel({
 
     try {
       const results = [];
-      for (let i = 0; i < problem.examples.length; i++) {
-        const example = problem.examples[i];
+      for (let i = 0; i < testCases.length; i++) {
+        const tc = testCases[i];
+        const runner = tc.runnerCode[language];
 
-        const response = await fetch('/api/execute', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            language: language,
-            code: code.trim(),
-          }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
+        if (!runner) {
           results.push({
             passed: false,
-            message: `Test ${i + 1}: Error - ${data.error || 'Execution failed'}`,
+            message: `${tc.name}: Test cases not available for ${language}`,
           });
           continue;
         }
 
-        const result = (data.output || '').trim();
-        const expected = example.output.trim();
-        const passed = result === expected;
+        const fullCode = `${code.trim()}\n\n${runner}`;
+
+        const response = await fetch('/api/execute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ language, code: fullCode }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || data.error) {
+          results.push({
+            passed: false,
+            message: `${tc.name}: Runtime error — ${data.error || 'Execution failed'}`,
+          });
+          continue;
+        }
+
+        const actual = normalizeOutput(data.output || '', tc.compareMode);
+        const expected = normalizeOutput(tc.expected, tc.compareMode);
+        const passed = actual === expected;
 
         results.push({
           passed,
-          message: `Test ${i + 1}: Input: ${example.input} | Expected: ${expected} | Got: ${result}`,
+          message: passed
+            ? `${tc.name}: Output matched "${tc.expected}"`
+            : `${tc.name}: Expected "${tc.expected}" but got "${(data.output || '').trim()}"`,
         });
       }
 
       setTestResults(results);
       const passedCount = results.filter((r) => r.passed).length;
-      setOutput(`✅ Test Results: ${passedCount}/${results.length} passed`);
+      setOutput(`Test Results: ${passedCount}/${results.length} passed`);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Unknown error';
       setError(`Error: ${errorMsg}`);
@@ -184,7 +224,7 @@ export default function CodeEditorPanel({
     } finally {
       setIsRunning(false);
     }
-  }, [code, language, problem.examples, setIsRunning]);
+  }, [code, language, problem.testCases, setIsRunning]);
 
   const handleReset = () => {
     setCode(codeTemplates[language] || '');
@@ -220,9 +260,10 @@ export default function CodeEditorPanel({
           <button
             className="btn btn-test"
             onClick={handleRunTestCases}
-            disabled={isRunning}
+            disabled={isRunning || !problem.testCases || problem.testCases.length === 0}
+            title={!problem.testCases || problem.testCases.length === 0 ? 'No test cases for this problem' : `Run ${problem.testCases.length} test cases`}
           >
-            {isRunning ? '⏳ Testing...' : '✅ Run Tests'}
+            {isRunning ? '⏳ Testing...' : `✅ Run Tests${problem.testCases ? ` (${problem.testCases.length})` : ''}`}
           </button>
           <button className="btn btn-reset" onClick={handleReset}>
             🔄 Reset
@@ -242,7 +283,7 @@ export default function CodeEditorPanel({
         <div className="output-header">
           <h3>Output</h3>
           {testResults.length > 0 && (
-            <span className="test-summary">
+            <span className={`test-summary ${testResults.every((r) => r.passed) ? 'all-passed' : 'some-failed'}`}>
               {testResults.filter((r) => r.passed).length}/{testResults.length} passed
             </span>
           )}
@@ -441,10 +482,23 @@ export default function CodeEditorPanel({
         .test-summary {
           font-size: 0.75rem;
           padding: 0.25rem 0.75rem;
-          background: rgba(34, 197, 94, 0.2);
-          color: var(--accent-green);
           border-radius: 9999px;
           font-weight: 600;
+        }
+
+        .test-summary.all-passed {
+          background: rgba(34, 197, 94, 0.2);
+          color: var(--accent-green);
+        }
+
+        .test-summary.some-failed {
+          background: rgba(239, 68, 68, 0.2);
+          color: var(--accent-red);
+        }
+
+        .btn-test:disabled {
+          opacity: 0.4;
+          cursor: not-allowed;
         }
 
         .test-results {
