@@ -29,6 +29,7 @@ export default function LayoutContent({ children }: { children: ReactNode }) {
           {/* Desktop Navigation */}
           <div className="nav-links-desktop">
             <a href="/" className="nav-link">🏠 Home</a>
+            <a href="/roadmap" className="nav-link">🗺️ Roadmap</a>
             <a href="/patterns" className="nav-link">📚 Patterns</a>
             <a href="/solver" className="nav-link">🔧 Solver</a>
             <a href="/flashcards" className="nav-link">🎴 Cards</a>
@@ -81,6 +82,7 @@ export default function LayoutContent({ children }: { children: ReactNode }) {
         {mobileMenuOpen && (
           <div className="nav-links-mobile">
             <a href="/" className="nav-link-mobile" onClick={closeMobileMenu}>🏠 Home</a>
+            <a href="/roadmap" className="nav-link-mobile" onClick={closeMobileMenu}>🗺️ Roadmap</a>
             <a href="/patterns" className="nav-link-mobile" onClick={closeMobileMenu}>📚 Patterns</a>
             <a href="/solver" className="nav-link-mobile" onClick={closeMobileMenu}>🔧 Solver</a>
             <a href="/flashcards" className="nav-link-mobile" onClick={closeMobileMenu}>🎴 Flashcards</a>
